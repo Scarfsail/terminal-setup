@@ -55,3 +55,23 @@ zellij
 ```
 
 Detach from a session with `Ctrl+o` then `d`.
+
+## Auto-start on new terminals
+
+This is an **optional** quality-of-life step.
+
+If an AI agent is following this guide, it should **ask the user first** whether they want Zellij auto-start added to their shell startup file before editing `.zshrc` or any other shell config.
+
+If the user wants every new terminal to either create a Zellij session or offer the existing sessions newest-first, use the repo-managed helper script:
+
+```bash
+chmod +x ~/dev/terminal-setup/scripts/zellij/zellij-auto-start
+echo '[[ -o interactive ]] && ~/dev/terminal-setup/scripts/zellij/zellij-auto-start' >> ~/.zshrc
+```
+
+Behavior:
+
+- outside Zellij: if no sessions exist, start a new one
+- outside Zellij: if sessions exist, show a table sorted by most recent use with columns for number, last used, session name, tab count, pane count, and working directory; each session gets a single-key shortcut, and pressing Enter attaches to the most recently used session
+- outside Zellij: below the table, `c` creates a new session and `s` skips Zellij for that terminal, both without needing Enter
+- inside Zellij: do nothing, so new panes and tabs do not try to attach again

@@ -1,0 +1,268 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ -n "${ZELLIJ:-}" ]]; then
+  exit 0
+fi
+
+if ! command -v zellij >/dev/null 2>&1; then
+  echo "zellij-auto-start: zellij is not installed or not on PATH" >&2
+  exit 1
+fi
+
+session_info_root="${HOME}/.cache/zellij/contract_version_1/session_info"
+session_shortcuts=()
+key_color=''
+reset_color=''
+
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  key_color=$'\033[1;36m'
+  reset_color=$'\033[0m'
+fi
+
+get_session_last_used_epoch() {
+  local session_name="$1"
+  local metadata_file="${session_info_root}/${session_name}/session-metadata.kdl"
+  local layout_file="${session_info_root}/${session_name}/session-layout.kdl"
+  local target_path=""
+
+  if [[ -f "$metadata_file" ]]; then
+    target_path="$metadata_file"
+  elif [[ -f "$layout_file" ]]; then
+    target_path="$layout_file"
+  elif [[ -d "${session_info_root}/${session_name}" ]]; then
+    target_path="${session_info_root}/${session_name}"
+  else
+    printf '0\n'
+    return
+  fi
+
+  stat -c '%Y' "$target_path"
+}
+
+format_session_last_used() {
+  local epoch="$1"
+
+  if [[ "$epoch" =~ ^[0-9]+$ ]] && (( epoch > 0 )); then
+    date -d "@${epoch}" '+%Y-%m-%d %H:%M'
+  else
+    printf 'unknown'
+  fi
+}
+
+get_session_tab_count() {
+  local session_name="$1"
+  local metadata_file="${session_info_root}/${session_name}/session-metadata.kdl"
+
+  if [[ ! -f "$metadata_file" ]]; then
+    printf '0\n'
+    return
+  fi
+
+  awk '
+    /^[[:space:]]*tabs[[:space:]]*\{/ { in_tabs=1; next }
+    /^[[:space:]]*panes[[:space:]]*\{/ { in_tabs=0 }
+    in_tabs && /^[[:space:]]*tab[[:space:]]*\{/ { count++ }
+    END { print count + 0 }
+  ' "$metadata_file"
+}
+
+get_session_pane_count() {
+  local session_name="$1"
+  local metadata_file="${session_info_root}/${session_name}/session-metadata.kdl"
+
+  if [[ ! -f "$metadata_file" ]]; then
+    printf '0\n'
+    return
+  fi
+
+  awk '
+    /^[[:space:]]*tabs[[:space:]]*\{/ { in_tabs=1; next }
+    /^[[:space:]]*panes[[:space:]]*\{/ { in_tabs=0 }
+    in_tabs && /^[[:space:]]*selectable_tiled_panes_count[[:space:]]+/ { sum += $2 }
+    in_tabs && /^[[:space:]]*selectable_floating_panes_count[[:space:]]+/ { sum += $2 }
+    END { print sum + 0 }
+  ' "$metadata_file"
+}
+
+get_session_working_directory() {
+  local session_name="$1"
+  local layout_file="${session_info_root}/${session_name}/session-layout.kdl"
+
+  if [[ ! -f "$layout_file" ]]; then
+    printf 'unknown'
+    return
+  fi
+
+  awk '
+    /^[[:space:]]*cwd[[:space:]]+"[^"]+"/ {
+      match($0, /"[^"]+"/)
+      print substr($0, RSTART + 1, RLENGTH - 2)
+      exit
+    }
+  ' "$layout_file"
+}
+
+build_session_shortcuts() {
+  local letter_shortcuts=(a b d e f g h i j k l m n o p q r t u v w x y z)
+  local max_sessions=$((9 + ${#letter_shortcuts[@]}))
+
+  if (( ${#sessions[@]} > max_sessions )); then
+    printf 'zellij-auto-start: too many sessions for single-key selection (%d > %d)\n' "${#sessions[@]}" "$max_sessions" >&2
+    exit 1
+  fi
+
+  session_shortcuts=()
+  for i in "${!sessions[@]}"; do
+    if (( i < 9 )); then
+      session_shortcuts+=("$((i + 1))")
+    else
+      session_shortcuts+=("${letter_shortcuts[i - 9]}")
+    fi
+  done
+}
+
+repeat_char() {
+  local char="$1"
+  local count="$2"
+  local result=""
+
+  while (( count > 0 )); do
+    result+="$char"
+    ((count--))
+  done
+
+  printf '%s' "$result"
+}
+
+print_table_border() {
+  local -n widths_ref="$1"
+
+  printf '+'
+  for width in "${widths_ref[@]}"; do
+    repeat_char '-' "$((width + 2))"
+    printf '+'
+  done
+  printf '\n'
+}
+
+print_table_row() {
+  local -n widths_ref="$1"
+  local color_first_column="${2:-false}"
+  shift 2
+  local values=("$@")
+  local i
+  local padded_value
+
+  printf '|'
+  for i in "${!widths_ref[@]}"; do
+    printf -v padded_value '%-*s' "${widths_ref[i]}" "${values[i]}"
+    if [[ "$color_first_column" == 'true' && "$i" == '0' && -n "$key_color" ]]; then
+      printf ' %s%s%s |' "$key_color" "$padded_value" "$reset_color"
+    else
+      printf ' %s |' "$padded_value"
+    fi
+  done
+  printf '\n'
+}
+
+mapfile -t raw_sessions < <(zellij list-sessions --short 2>/dev/null | sed '/^[[:space:]]*$/d')
+
+if (( ${#raw_sessions[@]} == 0 )); then
+  exec zellij
+fi
+
+session_rows=()
+for session_name in "${raw_sessions[@]}"; do
+  last_used_epoch="$(get_session_last_used_epoch "$session_name")"
+  session_rows+=("${last_used_epoch}"$'\t'"${session_name}")
+done
+
+mapfile -t session_rows < <(printf '%s\n' "${session_rows[@]}" | sort -t $'\t' -k1,1nr -k2,2)
+
+sessions=()
+last_used_labels=()
+tab_counts=()
+pane_counts=()
+working_directories=()
+for row in "${session_rows[@]}"; do
+  IFS=$'\t' read -r last_used_epoch session_name <<<"$row"
+  sessions+=("$session_name")
+  last_used_labels+=("$(format_session_last_used "$last_used_epoch")")
+  tab_counts+=("$(get_session_tab_count "$session_name")")
+  pane_counts+=("$(get_session_pane_count "$session_name")")
+  working_directories+=("$(get_session_working_directory "$session_name")")
+done
+
+build_session_shortcuts
+
+printf 'Available Zellij sessions (most recently used first):\n'
+table_headers=('number' 'last used' 'session name' 'tab count' 'pane count' 'working directory')
+column_widths=()
+for header in "${table_headers[@]}"; do
+  column_widths+=("${#header}")
+done
+
+table_rows=()
+for i in "${!sessions[@]}"; do
+  row=(
+    "${session_shortcuts[i]}"
+    "${last_used_labels[i]}"
+    "${sessions[i]}"
+    "${tab_counts[i]}"
+    "${pane_counts[i]}"
+    "${working_directories[i]}"
+  )
+  table_rows+=("$(printf '%s\t%s\t%s\t%s\t%s\t%s' "${row[@]}")")
+
+  for col_index in "${!row[@]}"; do
+    if (( ${#row[col_index]} > column_widths[col_index] )); then
+      column_widths[col_index]=${#row[col_index]}
+    fi
+  done
+done
+
+print_table_border column_widths
+print_table_row column_widths false "${table_headers[@]}"
+print_table_border column_widths
+for table_row in "${table_rows[@]}"; do
+  IFS=$'\t' read -r -a row <<<"$table_row"
+  print_table_row column_widths true "${row[@]}"
+done
+print_table_border column_widths
+
+printf '  [%sc%s] Create new session\n' "$key_color" "$reset_color"
+printf '  [%ss%s] Skip Zellij\n' "$key_color" "$reset_color"
+
+while true; do
+  printf 'Attach to session [1], c, or s: '
+  if ! IFS= read -r -s -n 1 selection; then
+    printf '\n'
+    exit 0
+  fi
+  printf '\n'
+
+  selection="${selection,,}"
+
+  if [[ -z "$selection" ]]; then
+    exec zellij attach "${sessions[0]}"
+  fi
+
+  case "$selection" in
+    c)
+      exec zellij
+      ;;
+    s)
+      exit 0
+      ;;
+  esac
+
+  for i in "${!session_shortcuts[@]}"; do
+    if [[ "$selection" == "${session_shortcuts[i]}" ]]; then
+      exec zellij attach "${sessions[i]}"
+    fi
+  done
+
+  printf "Invalid selection. Press one of the shown keys, c, s, or Enter for %s.\n" "${sessions[0]}" >&2
+done
