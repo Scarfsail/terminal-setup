@@ -35,9 +35,23 @@ Open a file directly:
 fresh path/to/file
 ```
 
+## Set as default `$EDITOR`
+
+Many CLIs (`git commit`, `glow`, `crontab -e`, etc.) launch whatever is in `$VISUAL` or `$EDITOR`. Point both at `fresh` so they all open it. `fresh` installs to `/usr/bin/fresh`, which is on the default `PATH` for interactive shells, GUI launches, and cron, so the bare command name is enough — no absolute path needed.
+
+Add to `~/.zshrc` (replacing the commented-out Oh My Zsh template block if present):
+
+```sh
+export EDITOR=fresh
+export VISUAL=fresh
+```
+
+Reload with `source ~/.zshrc` or open a new shell.
+
 ## Verify
 
 ```bash
 fresh --version
 command -v fresh
+echo "$EDITOR / $VISUAL"
 ```

@@ -49,6 +49,10 @@ Or page through it interactively:
 glow -p README.md
 ```
 
+## Default editor
+
+On first run, `glow` warns that `$EDITOR` is unset. Configure it once via [Fresh editor installation → Set as default `$EDITOR`](fresh_editor_installation.md#set-as-default-editor) (or substitute any other editor) and the warning goes away.
+
 ## Verify
 
 ```bash
