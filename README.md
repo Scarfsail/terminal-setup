@@ -28,6 +28,7 @@ The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), wh
 - [fnm](https://github.com/Schniz/fnm): fast Node.js version manager.
 - [Git](https://git-scm.com/): source control tooling and CLI setup.
 - [Python](https://www.python.org/): Python runtime and related terminal usage baseline.
+- [glow](https://github.com/charmbracelet/glow): terminal Markdown renderer (installed via snap; see [Snap PATH setup](snap_path_setup.md) if `/snap/bin` is missing from `PATH`).
 
 ## Customizations included
 

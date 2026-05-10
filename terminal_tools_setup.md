@@ -20,6 +20,8 @@ Every guide in this repository is meant to be **idempotent**: safe to follow on 
 12. [fnm installation](fnm_installation.md)
 13. [git installation](git_installation.md)
 14. [Python installation](python_installation.md)
+15. [Snap PATH setup](snap_path_setup.md) (only needed if you plan to install snap packages such as `glow`)
+16. [glow installation](glow_installation.md)
 
 ## Multiplexer choice
 
