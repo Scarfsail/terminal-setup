@@ -29,6 +29,8 @@ The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), wh
 - [Git](https://git-scm.com/): source control tooling and CLI setup.
 - [Python](https://www.python.org/): Python runtime and related terminal usage baseline.
 - [glow](https://github.com/charmbracelet/glow): terminal Markdown renderer (installed via snap; see [Snap PATH setup](snap_path_setup.md) if `/snap/bin` is missing from `PATH`).
+- [fzf](https://github.com/junegunn/fzf): fuzzy finder for history, files, and tab completion, wired up via the `fzf-zsh-plugin` Oh My Zsh plugin.
+- [zoxide](https://github.com/ajeetdsouza/zoxide): smarter `cd` that tracks frecency and lets you jump to directories with short fuzzy abbreviations.
 
 ## Customizations included
 
