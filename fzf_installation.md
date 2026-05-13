@@ -91,8 +91,6 @@ The picker is context-aware: `cd` shows only directories, `kill` shows processes
 | `fzf-kill` | Fuzzy-select a process to kill |
 | `fzf-git-checkout` | Fuzzy-pick a git branch to check out |
 | `fzf-git-branch` | Output a fuzzy-selected branch name (useful in scripts) |
-| `tm` | Fuzzy-search tmux sessions or create a new one |
-| `tmux-kill` | Fuzzy-select a tmux session to kill |
 | `fif` | Find a search term in files (requires `rg`) |
 | `pr-list` | Browse GitHub PRs with fzf (requires `gh`) |
 

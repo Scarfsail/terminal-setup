@@ -10,18 +10,15 @@ Use it with GitHub Copilot CLI, Claude Code, or another coding agent that can re
 
 Tell the agent what you want to set up, for example:
 
-- "Set up this machine using the guides in `terminal-setup`, and ask me whether I want tmux or Zellij."
+- "Set up this machine using the guides in `terminal-setup`."
 - "Install git, Python, lazygit and fnm from this repo's instructions."
-- "Apply the tmux setup including Oh My Tmux, local overrides, clipboard integration, and Copilot/Claude status."
 
-The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), which describes the recommended order and the tmux vs. Zellij branch.
+The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), which describes the recommended setup order.
 
 ## Tools covered
 
 - [zsh](https://www.zsh.org/) + [Oh My Zsh](https://ohmyz.sh/): shell migration from bash to a more ergonomic interactive shell setup.
-- [tmux](https://github.com/tmux/tmux/wiki): terminal multiplexer for persistent sessions, panes, and window-based workflows.
-- [Oh My Tmux](https://github.com/gpakosz/.tmux): opinionated tmux base config used here as the upstream foundation.
-- [Zellij](https://zellij.dev/): alternative terminal multiplexer for users who prefer it over tmux.
+- [Zellij](https://zellij.dev/): terminal multiplexer for persistent sessions, panes, and window-based workflows.
 - [Midnight Commander](https://midnight-commander.org/): classic terminal file manager for quick navigation and file operations.
 - [lazygit](https://github.com/jesseduffield/lazygit): lightweight terminal UI for common Git workflows.
 - [Fresh](https://getfresh.dev/): minimal terminal editor with a simple upstream install path.
@@ -34,8 +31,4 @@ The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), wh
 
 ## Customizations included
 
-- tmux setup based on Oh My Tmux, with local overrides kept separate from the upstream config.
-- WSL clipboard integration for tmux copy operations.
-- tmux quality-of-life defaults such as mouse support, retaining the current path in new panes, and plugin auto-management.
-- [`omerxx/tmux-floax`](https://github.com/omerxx/tmux-floax) enabled as the tracked tmux popup/scratchpad plugin.
-- Pane-aware tmux status integrations for [GitHub Copilot CLI](https://github.com/github/copilot-cli) and [Claude Code](https://docs.anthropic.com/), so the status bar follows the active pane and shows useful context usage.
+- Zellij auto-start script for interactive session launching.
