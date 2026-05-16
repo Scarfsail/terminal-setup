@@ -16,6 +16,7 @@ Every guide in this repository is meant to be **idempotent**: safe to follow on 
 8. [Python installation](python_installation.md)
 9. [Snap PATH setup](snap_path_setup.md) (only needed if you plan to install snap packages such as `glow`)
 10. [glow installation](glow_installation.md)
+11. [netwatch installation](netwatch_installation.md)
 
 ## Shared assumptions
 
