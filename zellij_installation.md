@@ -17,7 +17,7 @@ esac
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-tag="$(curl -fsSL https://api.github.com/repos/zellij-org/zellij/releases/latest | sed -n 's/.*"tag_name": "\([^"]*\)".*/\1/p' | head -n1)"
+tag="$(curl -fsSL https://api.github.com/repos/zellij-org/zellij/releases/latest | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1)"
 asset="zellij-${target}.tar.gz"
 curl -fL "https://github.com/zellij-org/zellij/releases/download/${tag}/${asset}" -o "$tmpdir/$asset"
 tar -xzf "$tmpdir/$asset" -C "$tmpdir"
