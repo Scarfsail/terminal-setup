@@ -58,6 +58,7 @@ config.font = wezterm.font_with_fallback({
 	"JetBrains Mono",
 	"Symbols Nerd Font Mono", -- harmless if not installed
 })
+config.font_size = 11.5
 
 --------------------------------------------------------------------------------
 -- Window
