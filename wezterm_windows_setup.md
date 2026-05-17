@@ -81,11 +81,21 @@ config.scrollback_lines = 10000
 --------------------------------------------------------------------------------
 -- Keybindings
 --------------------------------------------------------------------------------
+-- Honor the Kitty keyboard protocol. Without this, WezTerm sends legacy
+-- encoding where Ctrl+V and Ctrl+Shift+V are the SAME byte (0x16), so apps
+-- (e.g. Claude Code) cannot bind Ctrl+Shift+V distinctly. Defaults to false.
+config.enable_kitty_keyboard = true
+
 -- Fullscreen remapped to F11; WezTerm's default Alt+Enter fullscreen disabled
 -- so Alt+Enter is left free.
 config.keys = {
 	{ key = "F11", action = wezterm.action.ToggleFullScreen },
 	{ key = "Enter", mods = "ALT", action = wezterm.action.DisableDefaultAssignment },
+	-- Paste with Ctrl+V (default is Ctrl+Shift+V).
+	{ key = "v", mods = "CTRL", action = wezterm.action.PasteFrom("Clipboard") },
+	-- Let Ctrl+Shift+V pass through to the app (Claude uses it for image paste)
+	-- instead of WezTerm's built-in clipboard paste.
+	{ key = "v", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
 }
 
 --------------------------------------------------------------------------------
@@ -117,6 +127,9 @@ named `WSL:<distro>`.
 | `warn_about_missing_glyphs = false` | Silences font-fallback popups |
 | `front_end = "WebGpu"` + `max_fps = 120` | Modern GPU backend, smoother scrolling |
 | `enable_tab_bar = false` | No tab bar — Zellij owns tabs/panes |
+| `enable_kitty_keyboard = true` | Sends modifier-aware key sequences so apps can tell `Ctrl+Shift+V` from `Ctrl+V` (default is `false`) |
+| `Ctrl+V` | Paste clipboard text (WezTerm default is `Ctrl+Shift+V`) |
+| `Ctrl+Shift+V` | Passed through to the app — Claude Code uses it for **image paste** |
 | `F11` | Toggle fullscreen (Alt+Enter default disabled, left free) |
 | `gui-startup` handler | Window opens maximized (title bar kept) |
 
@@ -139,6 +152,13 @@ changes on save while running.
   **`Alt+Enter` inserts a newline** in Claude Code with no extra settings. For a
   dedicated `Shift+Enter`, add:
   `{ key = "Enter", mods = "SHIFT", action = wezterm.action.SendString("\x1b\r") }`.
+- **Image paste in Claude Code (WSL):** the `enable_kitty_keyboard = true` line
+  plus the `Ctrl+V` / `Ctrl+Shift+V` key bindings above are **mandatory** for
+  pasting images into Claude Code under WSL — they are one half of a two-part
+  setup. The matching Claude-side keybinding is documented in
+  [Claude Code installation](claude_installation.md#image-paste-in-wsl-mandatory).
+  Without both halves, `Ctrl+Shift+V` reaches Claude as the same byte as
+  `Ctrl+V` and image paste silently does nothing.
 - **`front_end = "WebGpu"`** rarely misbehaves on older/virtualized GPUs. If you
   see rendering glitches or a blank window, change that one line to `"OpenGL"`.
 - **`gui-startup`** only fires on a cold start (no existing WezTerm process); it
