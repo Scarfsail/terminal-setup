@@ -7,16 +7,17 @@ Every guide in this repository is meant to be **idempotent**: safe to follow on 
 ## Recommended order
 
 1. [Bash to Zsh migration](bash_to_zsh_migration.md)
-2. [Zellij installation](zellij_installation.md)
-3. [Midnight Commander installation](midnight_commander_installation.md)
-4. [lazygit installation](lazygit_installation.md)
-5. [Fresh editor installation](fresh_editor_installation.md)
-6. [fnm installation](fnm_installation.md)
-7. [git installation](git_installation.md)
-8. [Python installation](python_installation.md)
-9. [Snap PATH setup](snap_path_setup.md) (only needed if you plan to install snap packages such as `glow`)
-10. [glow installation](glow_installation.md)
-11. [netwatch installation](netwatch_installation.md)
+2. [fzf Tab completion setup](fzf_tab_completion.md) (fzf-tab + `eza` previews)
+3. [Zellij installation](zellij_installation.md)
+4. [Midnight Commander installation](midnight_commander_installation.md)
+5. [lazygit installation](lazygit_installation.md)
+6. [Fresh editor installation](fresh_editor_installation.md)
+7. [fnm installation](fnm_installation.md)
+8. [git installation](git_installation.md)
+9. [Python installation](python_installation.md)
+10. [Snap PATH setup](snap_path_setup.md) (only needed if you plan to install snap packages such as `glow`)
+11. [glow installation](glow_installation.md)
+12. [netwatch installation](netwatch_installation.md)
 
 ## Shared assumptions
 
@@ -39,7 +40,7 @@ sudo apt install -y curl git unzip ca-certificates
 
 At the time this documentation was reviewed, the machine already had:
 
-- `zsh` + Oh My Zsh
+- `zsh` + Oh My Zsh (with `fzf-tab` Tab completion and `eza` previews)
 - `zellij`
 - `mc` (Midnight Commander)
 - `lazygit`

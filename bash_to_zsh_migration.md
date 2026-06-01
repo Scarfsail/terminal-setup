@@ -5,7 +5,8 @@ This version reflects the current shell setup:
 - `zsh` is the default shell
 - Oh My Zsh is installed under `~/.oh-my-zsh`
 - the active theme is `agnoster`
-- the active plugin set is `git zsh-autosuggestions zsh-syntax-highlighting zsh-autocomplete fnm`
+- the active plugin set is `git zsh-autosuggestions fzf-zsh-plugin fzf-tab zsh-syntax-highlighting`
+- Tab completion runs through fzf (see [fzf Tab completion setup](fzf_tab_completion.md))
 - `fnm` is used instead of `nvm`
 - `~/.local/bin` is kept on `PATH`
 
@@ -67,11 +68,23 @@ if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
   git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 fi
 
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autocomplete" ]; then
-  git clone --depth 1 https://github.com/marlonrichert/zsh-autocomplete.git \
-    "$ZSH_CUSTOM/plugins/zsh-autocomplete"
+if [ ! -d "$ZSH_CUSTOM/plugins/fzf-zsh-plugin" ]; then
+  git clone --depth 1 https://github.com/unixorn/fzf-zsh-plugin.git \
+    "$ZSH_CUSTOM/plugins/fzf-zsh-plugin"
+fi
+
+if [ ! -d "$ZSH_CUSTOM/plugins/fzf-tab" ]; then
+  git clone --depth 1 https://github.com/Aloxaf/fzf-tab \
+    "$ZSH_CUSTOM/plugins/fzf-tab"
 fi
 ```
+
+> `fzf-tab` and `zsh-autocomplete` both take over the `Tab` key and cannot be
+> used together. This setup uses `fzf-tab`; if `zsh-autocomplete` was installed
+> previously, remove it with
+> `rm -rf "$ZSH_CUSTOM/plugins/zsh-autocomplete"`. See the
+> [fzf Tab completion setup](fzf_tab_completion.md) for the full picker and
+> preview configuration (and the `eza` dependency).
 
 ## 6. Make `.zshrc` match the current setup
 
@@ -82,12 +95,17 @@ Make sure the `plugins=(...)` block in `~/.zshrc` contains these entries once:
 ```zsh
 plugins=(
   git
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-  zsh-autocomplete
-  fnm
+  zsh-autosuggestions      # greyed-out inline suggestions from history
+  fzf-zsh-plugin           # fzf binary glue: Ctrl-T / Ctrl-R / Alt-C / ** trigger
+  fzf-tab                  # fzf-powered Tab completion (load AFTER fzf, BEFORE syntax-highlighting)
+  zsh-syntax-highlighting  # must be loaded last
 )
 ```
+
+Order matters: `fzf-tab` must load after `fzf-zsh-plugin` so it wins the `Tab`
+binding, and `zsh-syntax-highlighting` must be last. The `fzf-tab` preview
+`zstyle` configuration goes after `source $ZSH/oh-my-zsh.sh`; see the
+[fzf Tab completion setup](fzf_tab_completion.md).
 
 If you already use additional Oh My Zsh plugins, keep them and only add the missing entries above. For an idempotent setup, avoid blindly replacing the whole block unless you explicitly want to standardize on this exact list.
 
