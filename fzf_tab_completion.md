@@ -108,8 +108,10 @@ zstyle ':fzf-tab:*' use-fzf-default-opts no
 zstyle ':fzf-tab:*' fzf-flags --height=90% --layout=reverse --info=inline \
   --preview-window=right:60%:wrap \
   --color=hl:148,hl+:154,pointer:032,marker:010,bg+:237,gutter:008
-# Accept current selection and keep completing deeper paths by pressing '/'.
-zstyle ':fzf-tab:*' continuous-trigger '/'
+# Press Tab inside the popup to descend into the highlighted dir and keep
+# completing (Tab opens completion *and* drills deeper). '/' stays a normal
+# query character.
+zstyle ':fzf-tab:*' continuous-trigger 'tab'
 # cd / dirs: preview the directory contents.
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons --group-directories-first $realpath'
 # zoxide: `z <Tab>` (no keyword) completes local dirs via `_cd`; preview them too.
@@ -138,7 +140,7 @@ exec zsh
 | `git add <Tab>` / `git diff <Tab>` | paths in fzf, preview shows the diff |
 | `export <Tab>` | env vars in fzf, preview shows each value |
 | `vim src/<Tab>` | files in fzf with a `bat` preview |
-| `/` while in a fzf-tab popup | accept selection and keep completing deeper |
+| `Tab` while in a fzf-tab popup | descend into the highlighted dir and keep completing |
 | `Ctrl-T` / `Ctrl-R` / `Alt-C` | unchanged (file insert / history / cd into subdir) |
 | typing a command | greyed-out autosuggestion from history (`→` to accept) |
 
