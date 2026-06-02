@@ -122,17 +122,43 @@ zstyle ':fzf-tab:*' fzf-flags --height=90% --layout=reverse --info=inline \
 # completing (Tab opens completion *and* drills deeper). '/' stays a normal
 # query character.
 zstyle ':fzf-tab:*' continuous-trigger 'tab'
-# cd / dirs: preview the directory contents.
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons --group-directories-first $realpath'
-# zoxide: `z <Tab>` (no keyword) completes local dirs via `_cd`; preview them too.
+# cd / dirs: preview contents — icon+name left, dim size+date right-aligned
+# (see "Directory preview script" below). zoxide `z <Tab>` (no keyword)
+# completes local dirs via `_cd`, so it uses the same preview.
 # (The completion context key is `z`, not `__zoxide_z`.)
-zstyle ':fzf-tab:complete:z:*'  fzf-preview 'eza -1 --color=always --icons --group-directories-first $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview '$HOME/dev/terminal-setup/scripts/fzf/eza-fzf-preview $realpath'
+zstyle ':fzf-tab:complete:z:*'  fzf-preview '$HOME/dev/terminal-setup/scripts/fzf/eza-fzf-preview $realpath'
 # git: preview diffs / logs for the candidate ref.
 zstyle ':fzf-tab:complete:git-(add|diff|restore):*' fzf-preview 'git diff --color=always -- $word | head -200'
 zstyle ':fzf-tab:complete:git-checkout:*'           fzf-preview 'git log --oneline --color=always -20 $word'
 # export / env vars: show the current value.
 zstyle ':fzf-tab:complete:(export|unset|printenv):*' fzf-preview 'echo ${(P)word}'
 ```
+
+### Directory preview script
+
+The `cd`/`z` previews call [`scripts/fzf/eza-fzf-preview`](scripts/fzf/eza-fzf-preview),
+which renders each entry as **icon + name on the left (dominant)** with a
+**dimmed `size  modified-date` right-aligned** on the same line. Hidden entries
+are included, and it right-aligns to fzf's `$FZF_PREVIEW_COLUMNS` so the columns
+always fit the pane. fzf-tab runs previews via a non-interactive `zsh -c`, so the
+logic must live in a standalone executable (a `.zshrc` function would not be
+visible) — hence the script.
+
+Make sure it is executable, and adjust the path in the two `fzf-preview`
+zstyles above if you cloned this repo somewhere other than `~/dev/terminal-setup`:
+
+```bash
+chmod +x ~/dev/terminal-setup/scripts/fzf/eza-fzf-preview
+```
+
+Notes:
+
+- It needs `eza` (above) and a **Nerd Font** for the icon glyphs. `eza` only
+  emits icons/colors to a pipe with `--icons=always` / `--color=always` (plain
+  `--icons` silently shows nothing when piped, as fzf previews are).
+- To restyle, edit the script — e.g. swap to a tree (`eza --tree --level=2`),
+  add git status (`--git`), or change the date format (`--time-style`).
 
 ## 5. Reload the shell
 
@@ -144,8 +170,8 @@ exec zsh
 
 | Action | Result |
 |---|---|
-| `cd <Tab>` | fzf picker of directories, `eza` listing preview on the right |
-| `z <Tab>` | zoxide: completes local dirs via `_cd`, with the same `eza` preview |
+| `cd <Tab>` | fzf picker of directories; preview shows icon+name left, dim size+date right |
+| `z <Tab>` | zoxide: completes local dirs via `_cd`, with the same directory preview |
 | `git checkout <Tab>` | branches in fzf, preview shows that ref's log |
 | `git add <Tab>` / `git diff <Tab>` | paths in fzf, preview shows the diff |
 | `export <Tab>` | env vars in fzf, preview shows each value |

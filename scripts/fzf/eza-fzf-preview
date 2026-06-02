@@ -1,0 +1,35 @@
+#!/usr/bin/env zsh
+# fzf-tab directory preview.
+#
+# Renders a directory listing with the icon + name on the LEFT (dominant) and
+# a dimmed "size  modified-date" right-aligned on each line, so names stay the
+# focus. Hidden entries are included (-a). Width comes from fzf's
+# $FZF_PREVIEW_COLUMNS so the right edge always lines up with the preview pane.
+#
+# Usage: eza-fzf-preview <path>   (wired into the cd/z fzf-preview zstyles)
+emulate -L zsh
+setopt local_options globdots extended_glob
+
+local target=${1:a}
+# Non-directories (safety): fall back to a plain colored listing.
+[[ -d $target ]] || { eza -1 --color=always --icons=always -- "$target" 2>/dev/null; return; }
+
+local cols=${FZF_PREVIEW_COLUMNS:-${COLUMNS:-60}}
+local dim=$'\e[2m' rst=$'\e[0m'
+
+local -a names metas
+# Icon + colored name, one per line (dirs first).
+names=( "${(@f)$(eza -1 -a --color=always --icons=always --group-directories-first -- "$target" 2>/dev/null)}" )
+# "size  iso-date" in the same order.
+metas=( "${(@f)$(eza -1 -a --color=never -l --no-permissions --no-user \
+        --time-style=long-iso --group-directories-first -- "$target" 2>/dev/null \
+        | awk '{printf "%s  %s %s\n", $1, $2, $3}')}" )
+
+local i ncol meta vislen pad
+for (( i=1; i<=$#names; i++ )); do
+  ncol=$names[i]; meta=$metas[i]
+  vislen=${#${(S)ncol//$'\e'\[[0-9;]#m/}}   # name length without ANSI codes
+  pad=$(( cols - vislen - ${#meta} - 1 ))
+  (( pad < 1 )) && pad=1
+  printf '%s%*s%s%s%s\n' "$ncol" "$pad" "" "$dim" "$meta" "$rst"
+done
