@@ -13,9 +13,12 @@ completion menu. It reflects the current default setup:
 - The existing `fzf-zsh-plugin` keeps `Ctrl-T` / `Ctrl-R` / `Alt-C` working.
 
 > **Important compatibility note:** `fzf-tab` and `marlonrichert/zsh-autocomplete`
-> both take over the `Tab` key and **cannot coexist**. This setup removes
-> `zsh-autocomplete`. If you prefer the live, as-you-type drop-down menu of
-> `zsh-autocomplete`, do **not** install `fzf-tab` — pick one paradigm.
+> both take over the `Tab` key and **cannot coexist**. This setup does **not
+> load** `zsh-autocomplete` (it is absent from the `plugins=(...)` list). The
+> plugin directory may stay installed on disk — Oh My Zsh only loads plugins
+> named in the array — so removing it is optional. If you prefer the live,
+> as-you-type drop-down menu of `zsh-autocomplete`, do **not** load `fzf-tab`
+> instead — pick one paradigm.
 
 The commands below are written to be safe to re-run.
 
@@ -67,10 +70,13 @@ if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
 fi
 ```
 
-If you previously installed `zsh-autocomplete`, remove it so it stops fighting
-`fzf-tab` over the `Tab` key:
+If you previously used `zsh-autocomplete`, just make sure it is **not** in your
+`plugins=(...)` list (step 3) so it stops fighting `fzf-tab` over the `Tab` key.
+Leaving the directory on disk is harmless since Oh My Zsh only loads plugins
+named in the array; remove it entirely only if you want to:
 
 ```bash
+# optional
 rm -rf "$ZSH_CUSTOM/plugins/zsh-autocomplete"
 ```
 

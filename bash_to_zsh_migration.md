@@ -80,9 +80,10 @@ fi
 ```
 
 > `fzf-tab` and `zsh-autocomplete` both take over the `Tab` key and cannot be
-> used together. This setup uses `fzf-tab`; if `zsh-autocomplete` was installed
-> previously, remove it with
-> `rm -rf "$ZSH_CUSTOM/plugins/zsh-autocomplete"`. See the
+> used together. This setup uses `fzf-tab`, so keep `zsh-autocomplete` out of the
+> `plugins=(...)` list (the directory may stay installed on disk — Oh My Zsh only
+> loads plugins named in the array; `rm -rf "$ZSH_CUSTOM/plugins/zsh-autocomplete"`
+> if you want to remove it). See the
 > [fzf Tab completion setup](fzf_tab_completion.md) for the full picker and
 > preview configuration (and the `eza` dependency).
 
