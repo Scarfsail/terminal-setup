@@ -1,13 +1,16 @@
 #!/usr/bin/env zsh
 # fzf-tab directory preview.
 #
-# Renders a small (2-level) TREE with the icon + name on the LEFT (dominant) and
-# a dimmed "size  modified-date" right-aligned on each line, so names stay the
-# focus. Hidden entries are included; .git / node_modules are shown but not
-# expanded (noisy and rarely cd targets). Width comes from fzf's
-# $FZF_PREVIEW_COLUMNS so the right edge always lines up with the preview pane.
+# Renders a directory with the icon + name on the LEFT (dominant) and a dimmed
+# "size  modified-date" right-aligned on each line, so names stay the focus.
+# Hidden entries are included. Width comes from fzf's $FZF_PREVIEW_COLUMNS so the
+# right edge always lines up with the preview pane.
 #
-# Tweak: DEPTH (tree levels), IGNORE (pruned globs), or the eza flags below.
+# Two styles (default "flat"); flip the variable below or export
+# EZA_PREVIEW_STYLE=tree to switch:
+#   flat - one level, plain listing (dirs first)            [default]
+#   tree - 2-level tree with branch art (.git/node_modules pruned)
+#
 # Usage: eza-fzf-preview <path>   (wired into the cd/z fzf-preview zstyles)
 emulate -L zsh
 setopt local_options extended_glob
@@ -16,22 +19,30 @@ local target=${1:a}
 # Non-directories (safety): fall back to a plain colored listing.
 [[ -d $target ]] || { eza -1 --color=always --icons=always -- "$target" 2>/dev/null; return; }
 
+local style=${EZA_PREVIEW_STYLE:-flat}   # flat | tree
 local cols=${FZF_PREVIEW_COLUMNS:-${COLUMNS:-60}}
-local depth=2
-local ignore='.git|node_modules'
+local depth=2                            # tree depth (only used by "tree")
+local ignore='.git|node_modules'         # pruned globs (only used by "tree")
 local dim=$'\e[2m' rst=$'\e[0m'
 
-# eza --tree needs the path as an ARGUMENT (relying on cwd yields no output when
-# piped). Drop the root line (tail +2). Both passes use identical flags so the
-# tree order matches line-for-line.
+# Build the left side (icon + name, or branch-art + icon + name) and the
+# matching "size  iso-date" metadata, in identical order. eza --tree needs the
+# path as an ARGUMENT (relying on cwd yields no output when piped) and prints a
+# root line we drop with tail +2.
 local -a names metas
-# Left side: branch-art + icon + colored name.
-names=( "${(@f)$(eza --tree --level=$depth -a --ignore-glob=$ignore \
-        --color=always --icons=always -- "$target" 2>/dev/null | tail -n +2)}" )
-# Right side: "size  iso-date" in the same order.
-metas=( "${(@f)$(eza --tree --level=$depth -a --ignore-glob=$ignore \
-        --color=never -l --no-permissions --no-user --time-style=long-iso \
-        -- "$target" 2>/dev/null | tail -n +2 | awk '{printf "%s  %s %s\n", $1, $2, $3}')}" )
+if [[ $style == tree ]]; then
+  names=( "${(@f)$(eza --tree --level=$depth -a --ignore-glob=$ignore \
+          --color=always --icons=always -- "$target" 2>/dev/null | tail -n +2)}" )
+  metas=( "${(@f)$(eza --tree --level=$depth -a --ignore-glob=$ignore \
+          --color=never -l --no-permissions --no-user --time-style=long-iso \
+          -- "$target" 2>/dev/null | tail -n +2 | awk '{printf "%s  %s %s\n", $1, $2, $3}')}" )
+else
+  names=( "${(@f)$(eza -1 -a --color=always --icons=always --group-directories-first \
+          -- "$target" 2>/dev/null)}" )
+  metas=( "${(@f)$(eza -1 -a --color=never -l --no-permissions --no-user \
+          --time-style=long-iso --group-directories-first \
+          -- "$target" 2>/dev/null | awk '{printf "%s  %s %s\n", $1, $2, $3}')}" )
+fi
 
 local i ncol meta vislen pad
 for (( i=1; i<=$#names; i++ )); do
