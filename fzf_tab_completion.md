@@ -113,8 +113,16 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:
 _comp_options+=(globdots)
 # List directories before files in file completion (e.g. `cat <Tab>` /
 # `vim <Tab>` show folders first, then files — each sorted by name). fzf-tab
-# renders these as ordered groups (directories group on top).
+# only orders by group when completions carry group info, which needs a
+# descriptions format — without it everything collapses into one name-sorted
+# list. The two styles together put the directories group on top.
 zstyle ':completion:*' list-dirs-first true
+zstyle ':completion:*:descriptions' format '[%d]'
+# Offer the parent dir (../) but never the current dir (./). Oh My Zsh defaults
+# special-dirs to `true`, which adds both; `..` keeps only the parent.
+zstyle ':completion:*' special-dirs ..
+# ...and keep ../ in the directories group only — drop it from the file groups.
+zstyle ':completion:*:(all-files|globbed-files)' ignored-patterns '..'
 # Don't inherit FZF_DEFAULT_OPTS: it sets `--preview-window=:hidden` and its own
 # `--preview`, which would hide/override fzf-tab's previews. Use explicit flags
 # with a visible preview pane and the same color scheme instead.
@@ -137,7 +145,22 @@ zstyle ':fzf-tab:complete:git-(add|diff|restore):*' fzf-preview 'git diff --colo
 zstyle ':fzf-tab:complete:git-checkout:*'           fzf-preview 'git log --oneline --color=always -20 $word'
 # export / env vars: show the current value.
 zstyle ':fzf-tab:complete:(export|unset|printenv):*' fzf-preview 'echo ${(P)word}'
+# Catch-all (least specific, so the rules above still win): preview the
+# highlighted candidate — file contents via batcat, dirs via the eza script,
+# nothing for non-path candidates (flags, subcommands, ...).
+zstyle ':fzf-tab:complete:*:*' fzf-preview '
+  if [[ -d $realpath ]]; then
+    $HOME/dev/terminal-setup/scripts/fzf/eza-fzf-preview $realpath
+  elif [[ -f $realpath ]]; then
+    batcat --color=always --style=numbers --line-range=:300 $realpath 2>/dev/null
+  fi'
 ```
+
+> Setting a `:completion:*:descriptions` format makes fzf-tab show completions in
+> **groups** with headers (`[directory]`, `[file]`, …) and prefixes each row with
+> a small group-colored `·` marker. That grouping is what enables directories-first
+> ordering. To drop the dot markers (keeping the groups), add
+> `zstyle ':fzf-tab:*' prefix ''`.
 
 ### Directory preview script
 
@@ -186,7 +209,7 @@ exec zsh
 | `git checkout <Tab>` | branches in fzf, preview shows that ref's log |
 | `git add <Tab>` / `git diff <Tab>` | paths in fzf, preview shows the diff |
 | `export <Tab>` | env vars in fzf, preview shows each value |
-| `vim src/<Tab>` | files in fzf with a `bat` preview |
+| `cat <Tab>` / `vim <Tab>` | folders first (`[directory]`), then files; preview shows file contents (`batcat`) or the dir listing |
 | `Tab` while in a fzf-tab popup | descend into the highlighted dir and keep completing |
 | `Ctrl-T` / `Ctrl-R` / `Alt-C` | unchanged (file insert / history / cd into subdir) |
 | typing a command | greyed-out autosuggestion from history (`→` to accept) |
