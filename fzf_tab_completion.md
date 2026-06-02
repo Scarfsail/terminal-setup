@@ -101,6 +101,10 @@ zstyle ':completion:*' menu no
 zstyle ':completion:*:*:*:*:*' menu no
 # Case-insensitive / partial-word matching (was previously provided by zsh-autocomplete).
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+# Include hidden (dot) entries in completion, so `cd`/`z <Tab>` show .config,
+# .git, etc. (completion-scoped: does not change normal shell globbing). This
+# also reduces fzf-tab's single-child auto-skip, since dotfolders now count.
+_comp_options+=(globdots)
 # Don't inherit FZF_DEFAULT_OPTS: it sets `--preview-window=:hidden` and its own
 # `--preview`, which would hide/override fzf-tab's previews. Use explicit flags
 # with a visible preview pane and the same color scheme instead.
@@ -152,6 +156,13 @@ exec zsh
 > Typing `z <keyword><Tab>` switches zoxide into its own *interactive query*
 > mode, which jumps straight to the best database match and is not a normal
 > completion list — so no fzf-tab preview is shown there, by design.
+
+> Descending with `Tab` auto-skips **unambiguous single-child** directory
+> chains: if a folder has exactly one matching subdirectory, fzf-tab fills it
+> and keeps going (mirroring normal zsh Tab completion), so a single `Tab` can
+> land several levels deep and then exit. `globdots` (above) reduces this by
+> letting dotfolders count as siblings. fzf-tab has no option to force the
+> popup to stop on a single match without patching the plugin.
 
 ## Verification
 
