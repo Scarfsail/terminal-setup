@@ -111,6 +111,10 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:
 # .git, etc. (completion-scoped: does not change normal shell globbing). This
 # also reduces fzf-tab's single-child auto-skip, since dotfolders now count.
 _comp_options+=(globdots)
+# List directories before files in file completion (e.g. `cat <Tab>` /
+# `vim <Tab>` show folders first, then files — each sorted by name). fzf-tab
+# renders these as ordered groups (directories group on top).
+zstyle ':completion:*' list-dirs-first true
 # Don't inherit FZF_DEFAULT_OPTS: it sets `--preview-window=:hidden` and its own
 # `--preview`, which would hide/override fzf-tab's previews. Use explicit flags
 # with a visible preview pane and the same color scheme instead.
