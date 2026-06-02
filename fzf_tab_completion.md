@@ -138,12 +138,13 @@ zstyle ':fzf-tab:complete:(export|unset|printenv):*' fzf-preview 'echo ${(P)word
 ### Directory preview script
 
 The `cd`/`z` previews call [`scripts/fzf/eza-fzf-preview`](scripts/fzf/eza-fzf-preview),
-which renders each entry as **icon + name on the left (dominant)** with a
-**dimmed `size  modified-date` right-aligned** on the same line. Hidden entries
-are included, and it right-aligns to fzf's `$FZF_PREVIEW_COLUMNS` so the columns
-always fit the pane. fzf-tab runs previews via a non-interactive `zsh -c`, so the
-logic must live in a standalone executable (a `.zshrc` function would not be
-visible) — hence the script.
+which renders a **2-level tree** with the **icon + name on the left (dominant)**
+and a **dimmed `size  modified-date` right-aligned** on each line. Hidden entries
+are included; `.git` and `node_modules` are shown but not expanded (noisy, rarely
+`cd` targets). It right-aligns to fzf's `$FZF_PREVIEW_COLUMNS` so the columns
+always fit the pane. `eza` can't put metadata to the right of the name itself, and
+fzf-tab runs previews via a non-interactive `zsh -c`, so the logic must live in a
+standalone executable (a `.zshrc` function would not be visible) — hence the script.
 
 Make sure it is executable, and adjust the path in the two `fzf-preview`
 zstyles above if you cloned this repo somewhere other than `~/dev/terminal-setup`:
@@ -157,8 +158,9 @@ Notes:
 - It needs `eza` (above) and a **Nerd Font** for the icon glyphs. `eza` only
   emits icons/colors to a pipe with `--icons=always` / `--color=always` (plain
   `--icons` silently shows nothing when piped, as fzf previews are).
-- To restyle, edit the script — e.g. swap to a tree (`eza --tree --level=2`),
-  add git status (`--git`), or change the date format (`--time-style`).
+- To restyle, edit the script — change `depth` (tree levels) or `ignore` (pruned
+  globs) at the top, add git status (`--git`), or change the date format
+  (`--time-style`). Set `depth=1` for a flat listing.
 
 ## 5. Reload the shell
 
@@ -170,7 +172,7 @@ exec zsh
 
 | Action | Result |
 |---|---|
-| `cd <Tab>` | fzf picker of directories; preview shows icon+name left, dim size+date right |
+| `cd <Tab>` | fzf picker of directories; preview shows a 2-level tree (icon+name left, dim size+date right) |
 | `z <Tab>` | zoxide: completes local dirs via `_cd`, with the same directory preview |
 | `git checkout <Tab>` | branches in fzf, preview shows that ref's log |
 | `git add <Tab>` / `git diff <Tab>` | paths in fzf, preview shows the diff |
