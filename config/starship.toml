@@ -1,6 +1,7 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
+$status$cmd_duration
 [](fg:#1A3356)\
 $directory\
 [](fg:#1A3356 bg:#4A3A0A)\
@@ -10,8 +11,24 @@ $git_status\
 """
 
 # Disable the blank line at the start of the prompt
-# add_newline = false
+ add_newline = false
 
+[status]
+style = 'fg:gray'
+symbol = '🔴 '
+success_symbol = '🟢 SUCCESS'
+format = '[$symbol$common_meaning$signal_name$maybe_int]($style) '
+map_symbol = true
+disabled = false 
+ 
+[cmd_duration]
+min_time = 1
+show_milliseconds = true
+format = '[$duration](bold yellow)'
+
+[character]
+success_symbol = '[➜](bold green) '
+error_symbol = '[✗](bold red) '
 
 [directory]
 style = "fg:#D6E8FF bold bg:#1A3356"
