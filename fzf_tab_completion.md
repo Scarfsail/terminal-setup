@@ -2,7 +2,7 @@
 
 This guide makes **Tab** completion run through [fzf](https://github.com/junegunn/fzf):
 pressing `Tab` opens a fuzzy picker with a preview pane instead of zsh's plain
-completion menu. It reflects the current default setup:
+completion menu. It reflects the current **framework-free** setup (no Oh My Zsh):
 
 - [`fzf-tab`](https://github.com/Aloxaf/fzf-tab) takes over `Tab` and renders
   completions in fzf with previews.
@@ -10,15 +10,12 @@ completion menu. It reflects the current default setup:
   greyed-out inline suggestions from history as you type.
 - [`eza`](https://github.com/eza-community/eza) provides the directory preview
   used by `fzf-tab` (a modern `ls` replacement).
-- The existing `fzf-zsh-plugin` keeps `Ctrl-T` / `Ctrl-R` / `Alt-C` working.
+- fzf's [native integration](fzf_installation.md) (`eval "$(fzf --zsh)"`) keeps
+  `Ctrl-T` / `Ctrl-R` / `Alt-C` working.
 
-> **Important compatibility note:** `fzf-tab` and `marlonrichert/zsh-autocomplete`
-> both take over the `Tab` key and **cannot coexist**. This setup does **not
-> load** `zsh-autocomplete` (it is absent from the `plugins=(...)` list). The
-> plugin directory may stay installed on disk — Oh My Zsh only loads plugins
-> named in the array — so removing it is optional. If you prefer the live,
-> as-you-type drop-down menu of `zsh-autocomplete`, do **not** load `fzf-tab`
-> instead — pick one paradigm.
+Plugins are plain git clones under `~/.zsh/plugins`, `source`d directly from
+`~/.zshrc` (see the [migration guide](bash_to_zsh_migration.md)) — there is no
+plugin-manager array.
 
 The commands below are written to be safe to re-run.
 
@@ -42,87 +39,70 @@ eza --version
 ## 2. Install the plugins
 
 ```bash
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-mkdir -p "$ZSH_CUSTOM/plugins"
+ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
+mkdir -p "$ZSH_PLUGIN_DIR"
 
 # fzf-powered Tab completion
-if [ ! -d "$ZSH_CUSTOM/plugins/fzf-tab" ]; then
-  git clone --depth 1 https://github.com/Aloxaf/fzf-tab \
-    "$ZSH_CUSTOM/plugins/fzf-tab"
-fi
-
-# fzf binary glue (Ctrl-T / Ctrl-R / Alt-C / ** trigger)
-if [ ! -d "$ZSH_CUSTOM/plugins/fzf-zsh-plugin" ]; then
-  git clone --depth 1 https://github.com/unixorn/fzf-zsh-plugin.git \
-    "$ZSH_CUSTOM/plugins/fzf-zsh-plugin"
-fi
+[ -d "$ZSH_PLUGIN_DIR/fzf-tab" ] || \
+  git clone --depth 1 https://github.com/Aloxaf/fzf-tab "$ZSH_PLUGIN_DIR/fzf-tab"
 
 # Inline history suggestions
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-  git clone https://github.com/zsh-users/zsh-autosuggestions \
-    "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
-fi
+[ -d "$ZSH_PLUGIN_DIR/zsh-autosuggestions" ] || \
+  git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGIN_DIR/zsh-autosuggestions"
 
-# Syntax highlighting (must load last)
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting \
-    "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
-fi
+# Syntax highlighting (must be sourced last)
+[ -d "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting" ] || \
+  git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting"
 ```
 
-If you previously used `zsh-autocomplete`, just make sure it is **not** in your
-`plugins=(...)` list (step 3) so it stops fighting `fzf-tab` over the `Tab` key.
-Leaving the directory on disk is harmless since Oh My Zsh only loads plugins
-named in the array; remove it entirely only if you want to:
+> **fzf-tab vs. live-menu plugins:** `fzf-tab` and `marlonrichert/zsh-autocomplete`
+> both take over the `Tab` key and **cannot coexist**. This setup uses `fzf-tab`
+> and does not install `zsh-autocomplete`. Pick one paradigm — don't load both.
 
-```bash
-# optional
-rm -rf "$ZSH_CUSTOM/plugins/zsh-autocomplete"
-```
+## 3. Source the plugins in `~/.zshrc` (order matters)
 
-## 3. Set the plugin list in `~/.zshrc`
-
-Order matters: `fzf-tab` must load **after** `fzf-zsh-plugin` (so it wins the
-`Tab` binding) and **before** `zsh-syntax-highlighting` (which must be last).
+`fzf --zsh` must be evaluated **before** `fzf-tab` (so `fzf-tab` wins the `Tab`
+binding), `compinit` must have run **before** `fzf-tab`, and
+`zsh-syntax-highlighting` must be **last**:
 
 ```zsh
-plugins=(
-  git
-  zsh-autosuggestions      # greyed-out inline suggestions from history
-  fzf-zsh-plugin           # fzf binary glue: Ctrl-T / Ctrl-R / Alt-C / ** trigger
-  fzf-tab                  # fzf-powered Tab completion (load AFTER fzf, BEFORE syntax-highlighting)
-  zsh-syntax-highlighting  # must be loaded last
-)
+eval "$(fzf --zsh)"                                                   # native fzf bindings
+
+ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
+source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.plugin.zsh"
+# ...fzf-tab zstyles (step 4)...
+source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"  # MUST be last
 ```
 
 ## 4. Add the `fzf-tab` configuration
 
-Place this block **after** `source $ZSH/oh-my-zsh.sh` in `~/.zshrc`:
+Place this block **after** `fzf-tab` is sourced in `~/.zshrc`. The completion
+`zstyle`s near the top replace defaults Oh My Zsh used to provide:
 
 ```zsh
-# ---- fzf-tab configuration ----
+# ---- completion styling (no framework provides these) ----
 # Disable zsh's default menu selector so fzf-tab can take over Tab.
-# (the 5-colon override neutralizes Oh My Zsh's own `menu select` default)
 zstyle ':completion:*' menu no
 zstyle ':completion:*:*:*:*:*' menu no
-# Case-insensitive / partial-word matching (was previously provided by zsh-autocomplete).
+# Case-insensitive / partial-word matching.
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 # Include hidden (dot) entries in completion, so `cd`/`z <Tab>` show .config,
 # .git, etc. (completion-scoped: does not change normal shell globbing). This
 # also reduces fzf-tab's single-child auto-skip, since dotfolders now count.
 _comp_options+=(globdots)
-# List directories before files in file completion (e.g. `cat <Tab>` /
-# `vim <Tab>` show folders first, then files — each sorted by name). fzf-tab
+# List directories before files (folders first, each sorted by name). fzf-tab
 # only orders by group when completions carry group info, which needs a
-# descriptions format — without it everything collapses into one name-sorted
-# list. The two styles together put the directories group on top.
+# descriptions format — the two styles together put the directories group on top.
 zstyle ':completion:*' list-dirs-first true
 zstyle ':completion:*:descriptions' format '[%d]'
-# Offer the parent dir (../) but never the current dir (./). Oh My Zsh defaults
-# special-dirs to `true`, which adds both; `..` keeps only the parent.
+# Offer the parent dir (../) but never the current dir (./).
 zstyle ':completion:*' special-dirs ..
 # ...and keep ../ in the directories group only — drop it from the file groups.
 zstyle ':completion:*:(all-files|globbed-files)' ignored-patterns '..'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+# ---- fzf-tab configuration ----
 # Don't inherit FZF_DEFAULT_OPTS: it sets `--preview-window=:hidden` and its own
 # `--preview`, which would hide/override fzf-tab's previews. Use explicit flags
 # with a visible preview pane and the same color scheme instead.
@@ -233,7 +213,7 @@ exec zsh
 ## Verification
 
 ```bash
-grep -n '^plugins=' ~/.zshrc
+ls ~/.zsh/plugins/fzf-tab        # plugin present
 command -v eza && eza --version
 # Tab should be bound to fzf-tab-complete:
 zsh -ic 'bindkey "^I"'

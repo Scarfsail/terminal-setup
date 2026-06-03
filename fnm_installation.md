@@ -45,33 +45,17 @@ fi
 
 ## Zsh setup
 
-Make sure `~/.zshrc` contains these lines once:
+The shell is [framework-free](bash_to_zsh_migration.md) (no Oh My Zsh), so fnm is
+wired in with two plain lines in `~/.zshrc` — put fnm's dir on `PATH`, then
+evaluate its env:
 
 ```zsh
-plugins=(
-  git
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-  zsh-autocomplete
-  fnm
-)
-
-if [ -d "$HOME/.fnm" ]; then
-  export PATH="$HOME/.fnm:$PATH"
-elif [ -n "$XDG_DATA_HOME" ] && [ -d "$XDG_DATA_HOME/fnm" ]; then
-  export PATH="$XDG_DATA_HOME/fnm:$PATH"
-elif [ -d "$HOME/.local/share/fnm" ]; then
-  export PATH="$HOME/.local/share/fnm:$PATH"
-fi
-
-source $ZSH/oh-my-zsh.sh
-
-export PATH="$HOME/.local/bin:$PATH"
-
-if command -v fnm >/dev/null 2>&1; then
-  eval "$(fnm env --use-on-cd --shell zsh)"
-fi
+export PATH="$HOME/.local/share/fnm:$PATH"   # installer's default Linux location
+eval "$(fnm env --use-on-cd --shell zsh)"
 ```
+
+> Older installs used `~/.fnm`. If that's where yours lives, point the `PATH`
+> line there instead (`export PATH="$HOME/.fnm:$PATH"`).
 
 ## Minimal baseline
 

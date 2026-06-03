@@ -1,14 +1,22 @@
 # Bash to Zsh Migration Guide (WSL Ubuntu/Debian)
 
-This version reflects the current shell setup:
+This reflects the current shell setup, which is **framework-free** (no Oh My Zsh):
 
 - `zsh` is the default shell
-- Oh My Zsh is installed under `~/.oh-my-zsh`
-- the active theme is `agnoster`
-- the active plugin set is `git zsh-autosuggestions fzf-zsh-plugin fzf-tab zsh-syntax-highlighting`
-- Tab completion runs through fzf (see [fzf Tab completion setup](fzf_tab_completion.md))
+- the interactive config is a hand-written `~/.zshrc` (no framework loader)
+- the prompt is [starship](starship_installation.md) (replaces the old `agnoster` theme)
+- three zsh plugins are cloned to `~/.zsh/plugins` and `source`d directly:
+  `zsh-autosuggestions`, `fzf-tab`, `zsh-syntax-highlighting`
+- `fzf` uses its **native** shell integration (`eval "$(fzf --zsh)"`), not a plugin
+- `compinit` is cached (full security audit at most once per day)
 - `fnm` is used instead of `nvm`
 - `~/.local/bin` is kept on `PATH`
+
+> `~/.zshrc` itself is **not** version-controlled in this repo — it tends to differ
+> per machine. Treat the blocks below as the reference content to assemble. The
+> shared, machine-independent pieces *are* in the repo: the [starship theme](starship_installation.md),
+> the [fzf-tab preview script and `eza` previews](fzf_tab_completion.md), and the
+> [Zellij auto-start helper](zellij_installation.md).
 
 The commands below are written to be safe to re-run.
 
@@ -30,151 +38,118 @@ else
 fi
 ```
 
-## 3. Install Oh My Zsh without replacing an existing `.zshrc`
+## 3. Install the plugins into `~/.zsh/plugins`
+
+No framework is used; the plugins are plain git clones that the `.zshrc` sources
+by path.
 
 ```bash
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c \
-    "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
-    "" --unattended
-else
-  echo "Oh My Zsh already installed"
-fi
+ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
+mkdir -p "$ZSH_PLUGIN_DIR"
+
+[ -d "$ZSH_PLUGIN_DIR/zsh-autosuggestions" ] || \
+  git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGIN_DIR/zsh-autosuggestions"
+
+[ -d "$ZSH_PLUGIN_DIR/fzf-tab" ] || \
+  git clone --depth 1 https://github.com/Aloxaf/fzf-tab "$ZSH_PLUGIN_DIR/fzf-tab"
+
+[ -d "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting" ] || \
+  git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting"
 ```
 
-## 4. Set the theme to `agnoster`
+Update later with `git -C <dir> pull` per plugin.
 
-```bash
-if grep -q '^ZSH_THEME=' ~/.zshrc; then
-  sed -i 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' ~/.zshrc
-else
-  printf '\nZSH_THEME="agnoster"\n' >> ~/.zshrc
-fi
-```
+## 4. Assemble `~/.zshrc`
 
-> `agnoster` looks best with a Nerd Font or another font that includes Powerline glyphs.
-
-## 5. Install the current plugin set
-
-```bash
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-mkdir -p "$ZSH_CUSTOM/plugins"
-
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-  git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
-fi
-
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
-fi
-
-if [ ! -d "$ZSH_CUSTOM/plugins/fzf-zsh-plugin" ]; then
-  git clone --depth 1 https://github.com/unixorn/fzf-zsh-plugin.git \
-    "$ZSH_CUSTOM/plugins/fzf-zsh-plugin"
-fi
-
-if [ ! -d "$ZSH_CUSTOM/plugins/fzf-tab" ]; then
-  git clone --depth 1 https://github.com/Aloxaf/fzf-tab \
-    "$ZSH_CUSTOM/plugins/fzf-tab"
-fi
-```
-
-> `fzf-tab` and `zsh-autocomplete` both take over the `Tab` key and cannot be
-> used together. This setup uses `fzf-tab`, so keep `zsh-autocomplete` out of the
-> `plugins=(...)` list (the directory may stay installed on disk — Oh My Zsh only
-> loads plugins named in the array; `rm -rf "$ZSH_CUSTOM/plugins/zsh-autocomplete"`
-> if you want to remove it). See the
-> [fzf Tab completion setup](fzf_tab_completion.md) for the full picker and
-> preview configuration (and the `eza` dependency).
-
-## 6. Make `.zshrc` match the current setup
-
-### Plugin list
-
-Make sure the `plugins=(...)` block in `~/.zshrc` contains these entries once:
+The interactive config has a few ordered sections. The full fzf-tab preview
+configuration lives in the [fzf Tab completion guide](fzf_tab_completion.md); the
+essential skeleton is:
 
 ```zsh
-plugins=(
-  git
-  zsh-autosuggestions      # greyed-out inline suggestions from history
-  fzf-zsh-plugin           # fzf binary glue: Ctrl-T / Ctrl-R / Alt-C / ** trigger
-  fzf-tab                  # fzf-powered Tab completion (load AFTER fzf, BEFORE syntax-highlighting)
-  zsh-syntax-highlighting  # must be loaded last
-)
+# --- PATH -------------------------------------------------------------------
+case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac
+[ -d /snap/bin ] && case ":$PATH:" in *":/snap/bin:"*) ;; *) export PATH="$PATH:/snap/bin" ;; esac
+export PATH="$HOME/.local/share/fnm:$PATH"   # fnm
+
+# --- history ----------------------------------------------------------------
+HISTFILE="$HOME/.zsh_history"; HISTSIZE=50000; SAVEHIST=50000
+setopt extended_history hist_expire_dups_first hist_ignore_dups hist_ignore_space \
+       hist_verify inc_append_history share_history
+
+# --- shell options ----------------------------------------------------------
+setopt auto_cd auto_pushd pushd_ignore_dups interactive_comments prompt_subst
+
+# --- completion (cached compinit: full audit/rebuild at most once a day) -----
+# Glob qualifiers don't expand inside [[ ]], so collect matches in an array.
+autoload -Uz compinit
+() {
+  local zcd="$HOME/.zcompdump"
+  local -a stale=( $zcd(N.mh+24) )
+  if (( $#stale )) || [[ ! -s $zcd ]]; then compinit -d "$zcd"; else compinit -C -d "$zcd"; fi
+}
+zstyle ':completion:*' menu no
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+_comp_options+=(globdots)
+zstyle ':completion:*' list-dirs-first true
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+# --- fzf (native integration: Ctrl-T / Ctrl-R / Alt-C / ** trigger) ---------
+eval "$(fzf --zsh)"
+
+# --- plugins (order matters) ------------------------------------------------
+ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
+source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.plugin.zsh"
+# ...fzf-tab zstyles here (see fzf_tab_completion.md)...
+source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"  # MUST be last
+
+# --- tool init --------------------------------------------------------------
+eval "$(fnm env --use-on-cd --shell zsh)"
+eval "$(zoxide init zsh)"
+eval "$(starship init zsh)"
+
+# --- env / aliases ----------------------------------------------------------
+export EDITOR=fresh VISUAL=fresh
+alias bat='batcat'
+alias python='python3'
+alias glow='glow -w $(tput cols)'
+
+# --- secrets (kept out of the file; see ~/.config/secrets/) -----------------
+for secret in atlassian azure; do
+  [ -f "$HOME/.config/secrets/$secret.env" ] && . "$HOME/.config/secrets/$secret.env"
+done
 ```
 
-Order matters: `fzf-tab` must load after `fzf-zsh-plugin` so it wins the `Tab`
-binding, and `zsh-syntax-highlighting` must be last. The `fzf-tab` preview
-`zstyle` configuration goes after `source $ZSH/oh-my-zsh.sh`; see the
-[fzf Tab completion setup](fzf_tab_completion.md).
+Key ordering rules:
 
-If you already use additional Oh My Zsh plugins, keep them and only add the missing entries above. For an idempotent setup, avoid blindly replacing the whole block unless you explicitly want to standardize on this exact list.
+- `compinit` runs **before** `fzf-tab` is sourced.
+- `fzf --zsh` is evaluated **before** `fzf-tab` so fzf-tab wins the `Tab` binding.
+- `zsh-syntax-highlighting` is sourced **last**.
 
-### Make `fnm` available before Oh My Zsh loads plugins
+> **Secrets:** never inline tokens in `~/.zshrc`. Keep them in
+> `~/.config/secrets/*.env` (e.g. `chmod 600`), which the loop above sources when
+> present. That directory is not part of this repo.
 
-Ensure this block exists above `source $ZSH/oh-my-zsh.sh`:
+## 5. Prompt and per-tool integration
 
-```zsh
-# Make fnm available before Oh My Zsh loads plugins.
-if [ -d "$HOME/.fnm" ]; then
-  export PATH="$HOME/.fnm:$PATH"
-elif [ -n "$XDG_DATA_HOME" ] && [ -d "$XDG_DATA_HOME/fnm" ]; then
-  export PATH="$XDG_DATA_HOME/fnm:$PATH"
-elif [ -d "$HOME/.local/share/fnm" ]; then
-  export PATH="$HOME/.local/share/fnm:$PATH"
-fi
-```
+- **Prompt:** see [starship installation](starship_installation.md) — install the
+  binary and symlink the repo-managed theme.
+- **fzf-tab previews + `eza`:** see [fzf Tab completion setup](fzf_tab_completion.md).
+- **fnm:** see [fnm installation](fnm_installation.md).
+- **zoxide:** see [zoxide installation](zoxide_installation.md).
 
-### Keep `~/.local/bin` on `PATH`
+## 6. `.bashrc` fallback (optional)
 
-Ensure this line exists below `source $ZSH/oh-my-zsh.sh`:
-
-```zsh
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-### Hide the `agnoster` context segment
-
-The current setup suppresses the `user@host` context in the prompt:
-
-```zsh
-prompt_context(){}
-```
-
-### Initialize `fnm`
-
-Ensure this block exists near the end of `~/.zshrc`:
-
-```zsh
-if command -v fnm >/dev/null 2>&1; then
-  eval "$(fnm env --use-on-cd --shell zsh)"
-fi
-```
-
-## 7. Keep `.bashrc` aligned during the transition
-
-The current bash fallback keeps `~/.local/bin` on `PATH` and initializes `fnm`.
-Make sure `~/.bashrc` contains these lines once:
+If you keep a bash fallback during the transition, mirror only the essentials:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
-
-if [ -d "$HOME/.fnm" ]; then
-  export PATH="$HOME/.fnm:$PATH"
-elif [ -n "$XDG_DATA_HOME" ] && [ -d "$XDG_DATA_HOME/fnm" ]; then
-  export PATH="$XDG_DATA_HOME/fnm:$PATH"
-elif [ -d "$HOME/.local/share/fnm" ]; then
-  export PATH="$HOME/.local/share/fnm:$PATH"
-fi
-
-if command -v fnm >/dev/null 2>&1; then
-  eval "$(fnm env --use-on-cd --shell bash)"
-fi
+export PATH="$HOME/.local/share/fnm:$PATH"
+command -v fnm >/dev/null 2>&1 && eval "$(fnm env --use-on-cd --shell bash)"
 ```
 
-If you still have custom aliases or functions in `~/.bashrc`, copy only the ones you still want. The current Zsh setup relies mostly on Oh My Zsh plugins instead of carrying over the default bash aliases.
-
-## 8. Reload the shell
+## 7. Reload the shell
 
 ```bash
 exec zsh
@@ -183,11 +158,10 @@ exec zsh
 ## Verification
 
 ```bash
-echo "Shell: $SHELL"
-zsh --version
-grep '^ZSH_THEME=' ~/.zshrc
-grep -n '^plugins=' ~/.zshrc
-grep -n 'fnm env --use-on-cd --shell zsh' ~/.zshrc
-grep -n 'prompt_context(){}' ~/.zshrc
-command -v fnm && fnm --version
+echo "Shell: $SHELL"; zsh --version
+ls ~/.zsh/plugins                                  # the three plugins
+grep -q 'oh-my-zsh' ~/.zshrc && echo "OMZ STILL REFERENCED" || echo "framework-free ✓"
+zsh -ic 'bindkey "^I"'                             # Tab -> fzf-tab-complete
+zsh -ic '(( $+functions[_zsh_autosuggest_start] )) && echo autosuggest:ok'
+command -v starship && command -v fnm
 ```

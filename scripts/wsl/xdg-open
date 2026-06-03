@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "$#" -eq 0 ]; then
+  echo "xdg-open: missing target" >&2
+  exit 1
+fi
+
+target=$1
+shift || true
+
+if [[ "$target" == http://* || "$target" == https://* || "$target" == file://* || "$target" == mailto:* ]]; then
+  win_target=$target
+elif [[ ! -e "$target" && "$target" =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}(/.*)?$ ]]; then
+  # Bare hostname like "www.google.com" or "example.com/path" — assume https.
+  win_target="https://$target"
+else
+  win_target=$(wslpath -w "$(realpath -m "$target")")
+fi
+
+# cmd.exe /C start mangles URLs that contain query strings with '&', which breaks
+# OAuth handoffs. Use PowerShell instead so the full URL is preserved.
+ps_target=${win_target//\'/\'\'}
+
+if powershell.exe -NoProfile -Command "Start-Process -FilePath '$ps_target'" >/dev/null 2>&1; then
+  exit 0
+fi
+
+if explorer.exe "$win_target" >/dev/null 2>&1; then
+  exit 0
+fi
+
+echo "xdg-open: failed to open '$target'" >&2
+exit 1

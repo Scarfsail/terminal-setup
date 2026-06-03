@@ -41,8 +41,27 @@ cd /path/to/repo
 lazygit
 ```
 
+## Config (repo-managed)
+
+The reviewed machine uses [`delta`](https://github.com/dandavison/delta) as
+lazygit's diff pager. That config is version-controlled here and **symlinked**
+into place:
+
+```bash
+mkdir -p ~/.config/lazygit
+[ -e ~/.config/lazygit/config.yml ] && [ ! -L ~/.config/lazygit/config.yml ] && \
+  mv ~/.config/lazygit/config.yml ~/.config/lazygit/config.yml.bak
+ln -sfn "$HOME/dev/terminal-setup/config/lazygit/config.yml" ~/.config/lazygit/config.yml
+```
+
+Source: [`config/lazygit/config.yml`](config/lazygit/config.yml). It requires
+`delta` on `PATH` — install it (e.g. `sudo apt install git-delta`, or the upstream
+release binary if the package is unavailable). Without `delta`, drop the symlink
+to fall back to lazygit's built-in pager.
+
 ## Verify
 
 ```bash
 lazygit --version
+command -v delta && readlink ~/.config/lazygit/config.yml
 ```

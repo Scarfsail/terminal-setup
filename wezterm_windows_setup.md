@@ -27,6 +27,12 @@ WezTerm reads its config from the **Windows** user profile, not from WSL:
 This means the config can be created and edited from a WSL session by writing to
 the `/mnt/c/...` path. WezTerm **hot-reloads** the file on save — no restart needed.
 
+> Because the file lives on the Windows side, it **can't be symlinked** from this
+> repo across the WSL↔Windows boundary. A reference copy is kept at
+> [`config/wezterm/wezterm.lua`](config/wezterm/wezterm.lua); apply changes by
+> copying it to `/mnt/c/Users/<you>/.wezterm.lua` (and copy back when you edit the
+> live one).
+
 ## Configuration
 
 Create `C:\Users\<you>\.wezterm.lua` with the following. It boots into Ubuntu/zsh,
@@ -53,9 +59,12 @@ config.default_domain = "WSL:Ubuntu"
 -- No color_scheme set -> WezTerm's built-in palette, with a forced black bg.
 config.colors = { background = "#000000" }
 
--- JetBrains Mono ships with WezTerm (zero installs); Nerd Symbols fallback.
+-- JetBrains Mono ships with WezTerm (zero installs) for normal text;
+-- Cascadia Code NF (installed per-user) supplies the Nerd Font glyphs
+-- (powerline separators, git branch symbol, icons) used by the starship prompt.
 config.font = wezterm.font_with_fallback({
 	"JetBrains Mono",
+	"Cascadia Code NF", -- Nerd Font fallback for powerline/git/icon glyphs
 	"Symbols Nerd Font Mono", -- harmless if not installed
 })
 config.font_size = 11.5
@@ -121,7 +130,7 @@ named `WSL:<distro>`.
 |---|---|
 | `default_domain = "WSL:Ubuntu"` | Every window opens in Ubuntu/zsh, not cmd/PowerShell |
 | `colors.background = "#000000"` | Pure black background (no color scheme set) |
-| `font` | Built-in JetBrains Mono + Nerd Symbols fallback (zero installs) |
+| `font` | JetBrains Mono for text + **Cascadia Code NF** fallback for Nerd glyphs (powerline/git/icons in the [starship](starship_installation.md) prompt) |
 | `window_close_confirmation = "NeverPrompt"` | No close dialog — Zellij keeps the session alive |
 | `canonicalize_pasted_newlines` | Safer multi-line paste (no accidental execution) |
 | `warn_about_missing_glyphs = false` | Silences font-fallback popups |
@@ -146,6 +155,14 @@ changes on save while running.
 
 ## Notes
 
+- **Nerd Font for the prompt:** the [starship](starship_installation.md) prompt
+  uses powerline separators, a git-branch glyph, and directory icons that only
+  render with a Nerd Font. Plain JetBrains Mono lacks them, so the
+  `Cascadia Code NF` fallback above does the work. If those glyphs show as boxes
+  or blanks, install Cascadia Code NF (it's published as part of
+  [Cascadia Code](https://github.com/microsoft/cascadia-code/releases) — the `NF`
+  variant) for your Windows user, then confirm WezTerm sees the family name
+  exactly as `Cascadia Code NF`.
 - **`Shift+Enter` in Claude Code / TUIs:** WezTerm does not send a distinct
   sequence for `Shift+Enter` by default, so it submits instead of inserting a
   newline. With the default `Alt+Enter` fullscreen binding disabled (as above),

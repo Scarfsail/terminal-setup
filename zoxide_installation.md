@@ -23,7 +23,7 @@ fi
 
 ## Shell integration
 
-Add the following at the bottom of `~/.zshrc` (after `source $ZSH/oh-my-zsh.sh`):
+Add the following to `~/.zshrc` (with the other tool `eval`s):
 
 ```zsh
 eval "$(zoxide init zsh)"

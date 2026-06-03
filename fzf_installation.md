@@ -4,7 +4,10 @@ Official pages:
 
 - <https://github.com/junegunn/fzf>
 
-`fzf` is a general-purpose fuzzy finder for the terminal. It integrates with shell history, file search, and tab completion, and is used as a backbone by several other tools and plugins.
+`fzf` is a general-purpose fuzzy finder for the terminal. It integrates with shell
+history, file search, and tab completion, and is used as a backbone by several
+other tools (e.g. [zoxide](zoxide_installation.md)'s `zi`, and the
+[fzf-tab](fzf_tab_completion.md) completion picker).
 
 ## Install via apt
 
@@ -16,48 +19,23 @@ else
 fi
 ```
 
-## Oh My Zsh plugin (fzf-zsh-plugin)
+> The key-binding/completion integration below needs **fzf ≥ 0.48** (for
+> `fzf --zsh`). Check with `fzf --version`. If apt ships something older, install
+> the upstream binary instead: <https://github.com/junegunn/fzf/releases>.
 
-The bare `fzf` binary has no shell integration by default. The [`fzf-zsh-plugin`](https://github.com/unixorn/fzf-zsh-plugin) wires it up with key bindings, completion, and a collection of helper scripts.
+## Shell integration (native — no plugin)
 
-### 1. Clone the plugin
-
-```bash
-git clone --depth 1 https://github.com/unixorn/fzf-zsh-plugin \
-  "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-zsh-plugin"
-```
-
-### 2. Add to plugins in `~/.zshrc`
+This setup does **not** use `fzf-zsh-plugin` (or any framework plugin). Modern fzf
+ships its own zsh integration; one line in `~/.zshrc` provides `Ctrl-T`, `Ctrl-R`,
+`Alt-C`, and the `**<Tab>` trigger:
 
 ```zsh
-plugins=(
-  ...
-  fzf-zsh-plugin   # keep this last or near-last
-)
+eval "$(fzf --zsh)"
 ```
 
-> The plugin dynamically sets `$FZF_DEFAULT_COMMAND` based on what tools (e.g. `rg`, `bat`) are on your `$PATH`, so it should load after other plugins have extended `$PATH`.
-
-### 3. Create the plugin config directory
-
-Because `fzf` was installed via apt (not the fzf install script), the `~/.fzf/` directory does not exist. Create it so the plugin can write its settings there:
-
-```bash
-mkdir -p ~/.fzf
-cp "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-zsh-plugin/fzf-settings.zsh" \
-   ~/.fzf/fzf.zsh
-```
-
-### 4. Source the apt completion and key-binding scripts
-
-Add the following at the bottom of `~/.zshrc` (after `source $ZSH/oh-my-zsh.sh`):
-
-```zsh
-source /usr/share/doc/fzf/examples/completion.zsh 2>/dev/null
-source /usr/share/doc/fzf/examples/key-bindings.zsh 2>/dev/null
-```
-
-This enables `**<Tab>` fuzzy completion and the `Ctrl+T` / `Alt+C` bindings that the apt package provides but does not auto-load.
+Place it **before** `fzf-tab` is sourced (see the
+[migration guide](bash_to_zsh_migration.md)) so that `fzf-tab` wins the plain
+`Tab` binding while fzf keeps the rest.
 
 ## Key bindings
 
@@ -67,49 +45,33 @@ This enables `**<Tab>` fuzzy completion and the `Ctrl+T` / `Alt+C` bindings that
 | `Ctrl+T` | Paste a fuzzy-selected file path onto the command line |
 | `Alt+C` | `cd` into a fuzzy-selected directory |
 
-## Fuzzy tab completion (`**<Tab>`)
+## Fuzzy `**<Tab>` trigger
 
-Type `**` followed by Tab after any command to open an interactive fuzzy picker:
+fzf's native completion adds a `**` trigger:
 
 ```zsh
-vim **<Tab>          # pick any file
-cd **<Tab>           # pick a directory
+ssh **<Tab>          # pick a host
 kill -9 **<Tab>      # pick a process
-ssh **<Tab>          # pick a host from known_hosts
-vim src/**<Tab>      # pick within src/
-vim **/*.ts<Tab>     # pick only .ts files
+export **<Tab>       # pick an env var
 ```
 
-The picker is context-aware: `cd` shows only directories, `kill` shows processes, etc.
-
-## Helper scripts (from fzf-zsh-plugin)
-
-| Command | Description |
-|---------|-------------|
-| `fzf-find-edit` | Fuzzy-find a file and open it in `$EDITOR` |
-| `fzf-grep-edit` | Search file contents, pick a match, open in `$EDITOR` |
-| `fzf-kill` | Fuzzy-select a process to kill |
-| `fzf-git-checkout` | Fuzzy-pick a git branch to check out |
-| `fzf-git-branch` | Output a fuzzy-selected branch name (useful in scripts) |
-| `fif` | Find a search term in files (requires `rg`) |
-| `pr-list` | Browse GitHub PRs with fzf (requires `gh`) |
+> Because [fzf-tab](fzf_tab_completion.md) takes over plain `Tab`, the `**<Tab>`
+> trigger is mostly superseded for file/dir completion — plain `Tab` and `Ctrl-T`
+> cover those. Rebind with `FZF_COMPLETION_TRIGGER` if you want a different
+> sequence.
 
 ## Optional enhancements
 
-Install these for richer file previews inside fzf:
+Richer previews inside fzf-driven pickers:
 
-- `bat` — syntax-highlighted previews (`sudo apt install bat`)
-- `eza` — improved directory listings
-- `ripgrep` (`rg`) — faster file search, auto-detected by the plugin
-
-## Note on zsh-autocomplete compatibility
-
-`zsh-autocomplete` intercepts Tab aggressively and will prevent `**<Tab>` from working. If you use `fzf-zsh-plugin`, disable or remove `zsh-autocomplete` from your plugins list.
+- `bat` (Debian/Ubuntu binary is `batcat`) — syntax-highlighted file previews
+- `eza` — directory listings (used by [fzf-tab previews](fzf_tab_completion.md))
+- `ripgrep` (`rg`) — faster file search
 
 ## Verify
 
 ```bash
-fzf --version
-# Then test in an interactive shell:
-# Press Ctrl+R to open history search
+fzf --version          # expect >= 0.48
+# In an interactive shell, Ctrl+R should open history search:
+zsh -ic 'bindkey "^R"'  # -> fzf-history-widget
 ```

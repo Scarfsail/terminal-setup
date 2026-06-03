@@ -36,11 +36,27 @@ sudo install -m 0755 "$tmpdir/zellij" /usr/local/bin/zellij
 
 `zellij` works without any extra theme or plugin framework. Start with the default layout and add configuration only after the user has used it enough to know what they want to change.
 
-This repository keeps Zellij setup intentionally small:
+This repository keeps the Zellij *install* intentionally small:
 
 - install the upstream binary
 - keep it reachable through `~/.local/bin`
-- avoid writing config until there is a clear user preference
+
+## Config (repo-managed)
+
+The reviewed machine has a customized config (custom keybinds with
+`clear-defaults=true`). It is version-controlled here and **symlinked** into
+place, so edits in either location apply:
+
+```bash
+mkdir -p ~/.config/zellij
+[ -e ~/.config/zellij/config.kdl ] && [ ! -L ~/.config/zellij/config.kdl ] && \
+  mv ~/.config/zellij/config.kdl ~/.config/zellij/config.kdl.bak
+ln -sfn "$HOME/dev/terminal-setup/config/zellij/config.kdl" ~/.config/zellij/config.kdl
+```
+
+Source: [`config/zellij/config.kdl`](config/zellij/config.kdl). On a brand-new
+machine where you'd rather start from defaults, skip the symlink and let Zellij
+generate its own config (`zellij setup --dump-config`).
 
 ## Verify
 
