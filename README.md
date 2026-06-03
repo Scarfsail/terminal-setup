@@ -40,6 +40,7 @@ Machine-independent configs and helper scripts live in the repo as the single
 source of truth (most are symlinked into place — see the table in
 [`terminal_tools_setup.md`](terminal_tools_setup.md#repo-managed-configs-single-source-of-truth)):
 
+- [`config/zsh/`](config/zsh/) — sharable zsh config (history, options, completion, fzf/fzf-tab, env, aliases), sourced from `~/.zshrc` ([migration guide](bash_to_zsh_migration.md#4-assemble-zshrc)).
 - [`config/starship.toml`](config/starship.toml) — starship prompt theme (symlinked to `~/.config/starship.toml`).
 - [`config/zellij/config.kdl`](config/zellij/config.kdl) — Zellij keybinds/config (symlinked).
 - [`config/lazygit/config.yml`](config/lazygit/config.yml) — lazygit `delta` pager config (symlinked).

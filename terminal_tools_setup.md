@@ -38,6 +38,7 @@ editing them here updates the live tool:
 
 | Repo path | Symlinked to | Guide |
 |---|---|---|
+| [`config/zsh/`](config/zsh/) | *(sourced by path from `~/.zshrc`)* | [migration guide](bash_to_zsh_migration.md#4-assemble-zshrc) |
 | [`config/starship.toml`](config/starship.toml) | `~/.config/starship.toml` | [starship](starship_installation.md) |
 | [`config/zellij/config.kdl`](config/zellij/config.kdl) | `~/.config/zellij/config.kdl` | [zellij](zellij_installation.md) |
 | [`config/lazygit/config.yml`](config/lazygit/config.yml) | `~/.config/lazygit/config.yml` | [lazygit](lazygit_installation.md) |

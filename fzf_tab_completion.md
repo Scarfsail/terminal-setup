@@ -77,8 +77,15 @@ source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"  # 
 
 ## 4. Add the `fzf-tab` configuration
 
-Place this block **after** `fzf-tab` is sourced in `~/.zshrc`. The completion
-`zstyle`s near the top replace defaults Oh My Zsh used to provide:
+> **Source of truth:** on the reviewed machine this configuration is split into
+> repo files that `~/.zshrc` sources — the completion styling lives in
+> [`config/zsh/completion.zsh`](config/zsh/completion.zsh) and the fzf/fzf-tab
+> `zstyle`s in [`config/zsh/fzf.zsh`](config/zsh/fzf.zsh) (which auto-resolves the
+> preview-script path from its own location). See the
+> [migration guide](bash_to_zsh_migration.md#4-assemble-zshrc). The block below is
+> the same content, shown inline for reference.
+
+The completion `zstyle`s near the top replace defaults Oh My Zsh used to provide:
 
 ```zsh
 # ---- completion styling (no framework provides these) ----
@@ -158,12 +165,16 @@ script, or `export EZA_PREVIEW_STYLE=tree`, to switch:
 - `flat` — one level, plain listing (dirs first). **Default.**
 - `tree` — a 2-level tree with branch art (`.git`/`node_modules` pruned).
 
-Make sure it is executable, and adjust the path in the two `fzf-preview`
-zstyles above if you cloned this repo somewhere other than `~/dev/terminal-setup`:
+Make sure it is executable:
 
 ```bash
 chmod +x ~/dev/terminal-setup/scripts/fzf/eza-fzf-preview
 ```
+
+> When the previews are configured via [`config/zsh/fzf.zsh`](config/zsh/fzf.zsh),
+> the script path is derived from that file's own location (`${0:A:h:h:h}`), so it
+> works regardless of where the repo is cloned — no manual path edits needed. If
+> you instead inline the `zstyle`s into `~/.zshrc`, hard-code the absolute path.
 
 Notes:
 

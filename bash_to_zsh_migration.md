@@ -61,47 +61,40 @@ Update later with `git -C <dir> pull` per plugin.
 
 ## 4. Assemble `~/.zshrc`
 
-The interactive config has a few ordered sections. The full fzf-tab preview
-configuration lives in the [fzf Tab completion guide](fzf_tab_completion.md); the
-essential skeleton is:
+The machine-independent pieces live in this repo under
+[`config/zsh/`](config/zsh/) and are **sourced** from `~/.zshrc`, so they have one
+source of truth and `~/.zshrc` stays thin and per-machine. The shared files are:
+
+| File | Contents |
+|---|---|
+| [`config/zsh/history.zsh`](config/zsh/history.zsh) | `HISTFILE`/sizes + history `setopt`s |
+| [`config/zsh/options.zsh`](config/zsh/options.zsh) | `auto_cd`, `auto_pushd`, `interactive_comments`, … |
+| [`config/zsh/completion.zsh`](config/zsh/completion.zsh) | cached `compinit` + completion styling |
+| [`config/zsh/fzf.zsh`](config/zsh/fzf.zsh) | `fzf --zsh` + all fzf-tab `zstyle`s (preview path auto-resolved) |
+| [`config/zsh/env.zsh`](config/zsh/env.zsh) | `EDITOR`/`VISUAL` + `BROWSER` + wrapper |
+| [`config/zsh/aliases.zsh`](config/zsh/aliases.zsh) | `glow`, `bat`, `python` |
+
+`~/.zshrc` itself keeps only machine-specific bits (PATH, plugin sourcing, tool
+init, secrets, Zellij auto-start) and sources the shared files in order:
 
 ```zsh
-# --- PATH -------------------------------------------------------------------
+TERMINAL_SETUP="$HOME/dev/terminal-setup"
+
+# --- PATH (machine-specific) ------------------------------------------------
 case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac
 [ -d /snap/bin ] && case ":$PATH:" in *":/snap/bin:"*) ;; *) export PATH="$PATH:/snap/bin" ;; esac
 export PATH="$HOME/.local/share/fnm:$PATH"   # fnm
 
-# --- history ----------------------------------------------------------------
-HISTFILE="$HOME/.zsh_history"; HISTSIZE=50000; SAVEHIST=50000
-setopt extended_history hist_expire_dups_first hist_ignore_dups hist_ignore_space \
-       hist_verify inc_append_history share_history
+# --- shared config (one source of truth in terminal-setup/config/zsh) -------
+source "$TERMINAL_SETUP/config/zsh/history.zsh"
+source "$TERMINAL_SETUP/config/zsh/options.zsh"
+source "$TERMINAL_SETUP/config/zsh/completion.zsh"  # cached compinit + styling
+source "$TERMINAL_SETUP/config/zsh/fzf.zsh"         # fzf + fzf-tab (before plugins)
 
-# --- shell options ----------------------------------------------------------
-setopt auto_cd auto_pushd pushd_ignore_dups interactive_comments prompt_subst
-
-# --- completion (cached compinit: full audit/rebuild at most once a day) -----
-# Glob qualifiers don't expand inside [[ ]], so collect matches in an array.
-autoload -Uz compinit
-() {
-  local zcd="$HOME/.zcompdump"
-  local -a stale=( $zcd(N.mh+24) )
-  if (( $#stale )) || [[ ! -s $zcd ]]; then compinit -d "$zcd"; else compinit -C -d "$zcd"; fi
-}
-zstyle ':completion:*' menu no
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-_comp_options+=(globdots)
-zstyle ':completion:*' list-dirs-first true
-zstyle ':completion:*:descriptions' format '[%d]'
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-
-# --- fzf (native integration: Ctrl-T / Ctrl-R / Alt-C / ** trigger) ---------
-eval "$(fzf --zsh)"
-
-# --- plugins (order matters) ------------------------------------------------
+# --- plugins (installed locally under ~/.zsh/plugins; order matters) --------
 ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
 source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
 source "$ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.plugin.zsh"
-# ...fzf-tab zstyles here (see fzf_tab_completion.md)...
 source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"  # MUST be last
 
 # --- tool init --------------------------------------------------------------
@@ -109,27 +102,36 @@ eval "$(fnm env --use-on-cd --shell zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
-# --- env / aliases ----------------------------------------------------------
-export EDITOR=fresh VISUAL=fresh
-alias bat='batcat'
-alias python='python3'
-alias glow='glow -w $(tput cols)'
+# --- shared env + aliases ---------------------------------------------------
+source "$TERMINAL_SETUP/config/zsh/env.zsh"
+source "$TERMINAL_SETUP/config/zsh/aliases.zsh"
 
-# --- secrets (kept out of the file; see ~/.config/secrets/) -----------------
+# --- secrets (machine-specific; kept out of the repo) -----------------------
 for secret in atlassian azure; do
   [ -f "$HOME/.config/secrets/$secret.env" ] && . "$HOME/.config/secrets/$secret.env"
 done
+
+# --- Zellij auto-start (interactive shells only) ----------------------------
+[[ -o interactive ]] && "$TERMINAL_SETUP/scripts/zellij/zellij-auto-start"
+
+# --- local machine-specific additions below --------------------------------
 ```
 
 Key ordering rules:
 
-- `compinit` runs **before** `fzf-tab` is sourced.
-- `fzf --zsh` is evaluated **before** `fzf-tab` so fzf-tab wins the `Tab` binding.
+- `completion.zsh` (which runs `compinit`) is sourced **before** `fzf-tab`.
+- `fzf.zsh` (which runs `fzf --zsh`) is sourced **before** `fzf-tab` so fzf-tab
+  wins the `Tab` binding.
 - `zsh-syntax-highlighting` is sourced **last**.
 
 > **Secrets:** never inline tokens in `~/.zshrc`. Keep them in
 > `~/.config/secrets/*.env` (e.g. `chmod 600`), which the loop above sources when
 > present. That directory is not part of this repo.
+
+> **`compinit` caching:** `config/zsh/completion.zsh` runs the full security audit
+> at most once per day, then `touch`es `~/.zcompdump` so the 24-hour clock resets
+> (compinit won't rewrite an unchanged dump, so without the `touch` every startup
+> would re-run the ~250 ms `compaudit`).
 
 ## 5. Prompt and per-tool integration
 
