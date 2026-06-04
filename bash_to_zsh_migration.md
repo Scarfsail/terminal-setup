@@ -109,8 +109,8 @@ source "$TERMINAL_SETUP/config/zsh/aliases.zsh"
 source "$TERMINAL_SETUP/config/zsh/eza.zsh"         # eza ls/tree aliases
 
 # --- secrets (machine-specific; kept out of the repo) -----------------------
-for secret in atlassian azure; do
-  [ -f "$HOME/.config/secrets/$secret.env" ] && . "$HOME/.config/secrets/$secret.env"
+for secret in "$HOME"/.config/secrets/*.env; do
+  [ -f "$secret" ] && . "$secret"
 done
 
 # --- Zellij auto-start (interactive shells only) ----------------------------
