@@ -1,7 +1,7 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
-$time$cmd_duration $status
+$time$cmd_duration$status
 [](fg:#1A3356)\
 $directory\
 [](fg:#1A3356 bg:#4A3A0A)\
@@ -14,12 +14,12 @@ $git_status\
  add_newline = false
 
 [status]
-style = 'fg:red'
+style = 'bg:red fg:white bold'
 symbol = '❌ '
-success_symbol = '[✔](green)'
-format = '[$symbol$common_meaning$signal_name$maybe_int]($style) '
+success_symbol = ''
+format = '[($symbol$common_meaning$signal_name$maybe_int )]($style)'
 map_symbol = true
-disabled = false 
+disabled = false
  
 [cmd_duration]
 min_time = 500
