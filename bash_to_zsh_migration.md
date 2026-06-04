@@ -73,6 +73,7 @@ source of truth and `~/.zshrc` stays thin and per-machine. The shared files are:
 | [`config/zsh/fzf.zsh`](config/zsh/fzf.zsh) | `fzf --zsh` + all fzf-tab `zstyle`s (preview path auto-resolved) |
 | [`config/zsh/env.zsh`](config/zsh/env.zsh) | `EDITOR`/`VISUAL` + `BROWSER` + wrapper |
 | [`config/zsh/aliases.zsh`](config/zsh/aliases.zsh) | `glow`, `bat`, `python` |
+| [`config/zsh/eza.zsh`](config/zsh/eza.zsh) | `ls`/`l`/`ll`/`la`/`lt`/`tree` eza aliases (see [eza](eza_installation.md)) |
 
 `~/.zshrc` itself keeps only machine-specific bits (PATH, plugin sourcing, tool
 init, secrets, Zellij auto-start) and sources the shared files in order:
@@ -105,6 +106,7 @@ eval "$(starship init zsh)"
 # --- shared env + aliases ---------------------------------------------------
 source "$TERMINAL_SETUP/config/zsh/env.zsh"
 source "$TERMINAL_SETUP/config/zsh/aliases.zsh"
+source "$TERMINAL_SETUP/config/zsh/eza.zsh"         # eza ls/tree aliases
 
 # --- secrets (machine-specific; kept out of the repo) -----------------------
 for secret in atlassian azure; do

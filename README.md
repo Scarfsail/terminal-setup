@@ -30,7 +30,7 @@ The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), wh
 - [glow](https://github.com/charmbracelet/glow): terminal Markdown renderer (installed via snap; see [Snap PATH setup](snap_path_setup.md) if `/snap/bin` is missing from `PATH`).
 - [fzf](https://github.com/junegunn/fzf): fuzzy finder for history, files, and tab completion, wired up via fzf's native shell integration (`fzf --zsh`).
 - [fzf-tab](https://github.com/Aloxaf/fzf-tab): replaces zsh's `Tab` completion menu with an fzf picker and preview pane ([guide](fzf_tab_completion.md)).
-- [eza](https://github.com/eza-community/eza): modern `ls` replacement; provides the directory previews used by `fzf-tab`.
+- [eza](https://github.com/eza-community/eza): modern `ls` replacement; backs the `ls`/`ll`/`lt`/`tree` aliases and the directory previews used by `fzf-tab` ([guide](eza_installation.md)).
 - [zoxide](https://github.com/ajeetdsouza/zoxide): smarter `cd` that tracks frecency and lets you jump to directories with short fuzzy abbreviations.
 - [Claude Code](https://www.anthropic.com/claude-code): Anthropic's terminal coding agent, including the WSL image-paste setup ([guide](claude_installation.md)).
 
@@ -40,7 +40,7 @@ Machine-independent configs and helper scripts live in the repo as the single
 source of truth (most are symlinked into place — see the table in
 [`terminal_tools_setup.md`](terminal_tools_setup.md#repo-managed-configs-single-source-of-truth)):
 
-- [`config/zsh/`](config/zsh/) — sharable zsh config (history, options, completion, fzf/fzf-tab, env, aliases), sourced from `~/.zshrc` ([migration guide](bash_to_zsh_migration.md#4-assemble-zshrc)).
+- [`config/zsh/`](config/zsh/) — sharable zsh config (history, options, completion, fzf/fzf-tab, env, aliases, eza), sourced from `~/.zshrc` ([migration guide](bash_to_zsh_migration.md#4-assemble-zshrc)).
 - [`config/starship.toml`](config/starship.toml) — starship prompt theme (symlinked to `~/.config/starship.toml`).
 - [`config/zellij/config.kdl`](config/zellij/config.kdl) — Zellij keybinds/config (symlinked).
 - [`config/lazygit/config.yml`](config/lazygit/config.yml) — lazygit `delta` pager config (symlinked).
