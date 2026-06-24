@@ -69,6 +69,7 @@ source of truth and `~/.zshrc` stays thin and per-machine. The shared files are:
 |---|---|
 | [`config/zsh/history.zsh`](config/zsh/history.zsh) | `HISTFILE`/sizes + history `setopt`s |
 | [`config/zsh/options.zsh`](config/zsh/options.zsh) | `auto_cd`, `auto_pushd`, `interactive_comments`, … |
+| [`config/zsh/keybindings.zsh`](config/zsh/keybindings.zsh) | `bindkey`s — Ctrl+Left/Right word motion |
 | [`config/zsh/completion.zsh`](config/zsh/completion.zsh) | cached `compinit` + completion styling |
 | [`config/zsh/fzf.zsh`](config/zsh/fzf.zsh) | `fzf --zsh` + all fzf-tab `zstyle`s (preview path auto-resolved) |
 | [`config/zsh/env.zsh`](config/zsh/env.zsh) | `EDITOR`/`VISUAL` + `BROWSER` + wrapper |
@@ -89,6 +90,7 @@ export PATH="$HOME/.local/share/fnm:$PATH"   # fnm
 # --- shared config (one source of truth in terminal-setup/config/zsh) -------
 source "$TERMINAL_SETUP/config/zsh/history.zsh"
 source "$TERMINAL_SETUP/config/zsh/options.zsh"
+source "$TERMINAL_SETUP/config/zsh/keybindings.zsh"
 source "$TERMINAL_SETUP/config/zsh/completion.zsh"  # cached compinit + styling
 source "$TERMINAL_SETUP/config/zsh/fzf.zsh"         # fzf + fzf-tab (before plugins)
 
