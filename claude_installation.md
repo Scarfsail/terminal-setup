@@ -58,7 +58,7 @@ claude doctor
 `claude doctor` reports installation health and also validates
 `~/.claude/keybindings.json` (see the next section).
 
-## Image paste in WSL (mandatory)
+## Image paste in WSL (WSL only — mandatory there)
 
 Pasting an image from the Windows clipboard into Claude Code under WSL requires
 a **two-part** setup. Both halves are mandatory — with only one, `Ctrl+Shift+V`

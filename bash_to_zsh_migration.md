@@ -1,4 +1,4 @@
-# Bash to Zsh Migration Guide (WSL Ubuntu/Debian)
+# Bash to Zsh Migration Guide (Debian/Ubuntu, WSL or native)
 
 This reflects the current shell setup, which is **framework-free** (no Oh My Zsh):
 
@@ -84,7 +84,7 @@ TERMINAL_SETUP="$HOME/dev/terminal-setup"
 
 # --- PATH (machine-specific) ------------------------------------------------
 case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac
-[ -d /snap/bin ] && case ":$PATH:" in *":/snap/bin:"*) ;; *) export PATH="$PATH:/snap/bin" ;; esac
+[ -d /snap/bin ] && case ":$PATH:" in *":/snap/bin:"*) ;; *) export PATH="$PATH:/snap/bin" ;; esac  # no-op without snap
 export PATH="$HOME/.local/share/fnm:$PATH"   # fnm
 
 # --- shared config (one source of truth in terminal-setup/config/zsh) -------

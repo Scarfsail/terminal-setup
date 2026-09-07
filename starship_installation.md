@@ -69,10 +69,12 @@ Powerline separators are drawn with `` (U+E0B0).
 
 ## Nerd Font requirement
 
-The separators and icons only render with a **Nerd Font** in the terminal. This
-setup uses WezTerm with a `Cascadia Code NF` fallback — see
-[WezTerm setup](wezterm_windows_setup.md). Without a Nerd Font, glyphs show as
-boxes or blanks (the prompt still works, it just looks wrong).
+The separators and icons only render with a **Nerd Font** in the terminal that
+displays them. On WSL this setup uses WezTerm with a `Cascadia Code NF` fallback —
+see [WezTerm setup](wezterm_windows_setup.md). On a native or headless machine the
+font is a property of your local terminal emulator (the client you SSH from), so
+configure it there; nothing needs installing on the remote box. Without a Nerd Font,
+glyphs show as boxes or blanks (the prompt still works, it just looks wrong).
 
 ## Verify
 

@@ -1,6 +1,8 @@
 # terminal-setup
 
-Short, human-readable setup guides for a WSL Ubuntu/Debian terminal environment. The repository is meant to help an AI coding assistant or a human apply a consistent terminal setup without rewriting everything from scratch.
+Short, human-readable setup guides for an apt-based Debian/Ubuntu terminal environment. The repository is meant to help an AI coding assistant or a human apply a consistent terminal setup without rewriting everything from scratch.
+
+These guides were written on WSL, and a few pieces are genuinely Windows-side (WezTerm, the `xdg-open` browser wrapper, Claude Code's image paste). Those are marked **WSL only**; everything else applies unchanged to a native Debian/Ubuntu machine, including a headless server used over SSH.
 
 The guides are written to be **idempotent**: they are intended to be safe to follow on machines that already have some of the tools installed.
 
@@ -19,7 +21,7 @@ The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), wh
 
 - [zsh](https://www.zsh.org/): **framework-free** shell migration from bash (no Oh My Zsh) — plugins cloned to `~/.zsh/plugins` and sourced directly ([guide](bash_to_zsh_migration.md)).
 - [starship](https://starship.rs/): the prompt (replaces the old `agnoster` theme); theme is version-controlled and symlinked from this repo ([guide](starship_installation.md)).
-- [WezTerm](https://wezfurlong.org/wezterm/): GPU terminal emulator on Windows that opens into WSL ([guide](wezterm_windows_setup.md)).
+- [WezTerm](https://wezfurlong.org/wezterm/): **WSL only** — GPU terminal emulator on Windows that opens into WSL ([guide](wezterm_windows_setup.md)).
 - [Zellij](https://zellij.dev/): terminal multiplexer for persistent sessions, panes, and window-based workflows.
 - [Midnight Commander](https://midnight-commander.org/): classic terminal file manager for quick navigation and file operations.
 - [lazygit](https://github.com/jesseduffield/lazygit): lightweight terminal UI for common Git workflows.
@@ -27,12 +29,12 @@ The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), wh
 - [fnm](https://github.com/Schniz/fnm): fast Node.js version manager.
 - [Git](https://git-scm.com/): source control tooling and CLI setup.
 - [Python](https://www.python.org/): Python runtime and related terminal usage baseline.
-- [glow](https://github.com/charmbracelet/glow): terminal Markdown renderer (installed via snap; see [Snap PATH setup](snap_path_setup.md) if `/snap/bin` is missing from `PATH`).
+- [glow](https://github.com/charmbracelet/glow): terminal Markdown renderer (Charmbracelet apt repo by default; snap is an alternative where snapd exists — then see [Snap PATH setup](snap_path_setup.md) if `/snap/bin` is missing from `PATH`).
 - [fzf](https://github.com/junegunn/fzf): fuzzy finder for history, files, and tab completion, wired up via fzf's native shell integration (`fzf --zsh`).
 - [fzf-tab](https://github.com/Aloxaf/fzf-tab): replaces zsh's `Tab` completion menu with an fzf picker and preview pane ([guide](fzf_tab_completion.md)).
 - [eza](https://github.com/eza-community/eza): modern `ls` replacement; backs the `ls`/`ll`/`lt`/`tree` aliases and the directory previews used by `fzf-tab` ([guide](eza_installation.md)).
 - [zoxide](https://github.com/ajeetdsouza/zoxide): smarter `cd` that tracks frecency and lets you jump to directories with short fuzzy abbreviations.
-- [Claude Code](https://www.anthropic.com/claude-code): Anthropic's terminal coding agent, including the WSL image-paste setup ([guide](claude_installation.md)).
+- [Claude Code](https://www.anthropic.com/claude-code): Anthropic's terminal coding agent, including the **WSL-only** image-paste setup ([guide](claude_installation.md)).
 
 ## Repo-managed configs & scripts
 
@@ -44,8 +46,8 @@ source of truth (most are symlinked into place — see the table in
 - [`config/starship.toml`](config/starship.toml) — starship prompt theme (symlinked to `~/.config/starship.toml`).
 - [`config/zellij/config.kdl`](config/zellij/config.kdl) — Zellij keybinds/config (symlinked).
 - [`config/lazygit/config.yml`](config/lazygit/config.yml) — lazygit `delta` pager config (symlinked).
-- [`config/wezterm/wezterm.lua`](config/wezterm/wezterm.lua) — WezTerm config reference copy (Windows side; can't be symlinked across the WSL↔Windows boundary).
-- [`scripts/wsl/xdg-open`](scripts/wsl/xdg-open) — WSL→Windows browser wrapper used as `$BROWSER` (symlinked to `~/.local/bin/xdg-open`).
+- [`config/wezterm/wezterm.lua`](config/wezterm/wezterm.lua) — **WSL only** — WezTerm config reference copy (Windows side; can't be symlinked across the WSL↔Windows boundary).
+- [`scripts/wsl/xdg-open`](scripts/wsl/xdg-open) — **WSL only** — WSL→Windows browser wrapper used as `$BROWSER` (symlinked to `~/.local/bin/xdg-open`); `config/zsh/env.zsh` sets `BROWSER` only when it detects WSL.
 - [`scripts/fzf/eza-fzf-preview`](scripts/fzf/eza-fzf-preview) — directory preview for fzf-tab.
 - [`scripts/zellij/zellij-auto-start`](scripts/zellij/zellij-auto-start) — interactive Zellij session launcher.
 

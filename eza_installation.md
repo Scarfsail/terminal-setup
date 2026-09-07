@@ -46,9 +46,10 @@ Shared options applied to every alias: `--group-directories-first --git`.
 | `tree` | `eza … --tree` | full tree |
 
 `EZA_ICONS_AUTO=1` is exported so icons show when output is a terminal. They need a
-**Nerd Font** in the terminal emulator (the [WezTerm config](wezterm_windows_setup.md)
-already uses one); without one the icon glyphs render as tofu boxes — drop the export
-or set `EZA_ICONS_AUTO=0` if you don't have a Nerd Font.
+**Nerd Font** in whichever terminal emulator is displaying the output — on WSL that
+is the [WezTerm config](wezterm_windows_setup.md), and over SSH it is the font on the
+machine you connect *from*, not the one you connect *to*. Without one the icon glyphs
+render as tofu boxes — drop the export or set `EZA_ICONS_AUTO=0`.
 
 ## Verify
 

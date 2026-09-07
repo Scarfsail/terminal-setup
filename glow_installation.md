@@ -5,21 +5,12 @@ Official pages:
 - <https://github.com/charmbracelet/glow>
 - <https://snapcraft.io/glow>
 
-`glow` is a terminal Markdown renderer from Charmbracelet. The Charmbracelet apt repository is the upstream-recommended route on Debian/Ubuntu; the snap package is a single-command alternative that does not require adding a third-party apt source.
+`glow` is a terminal Markdown renderer from Charmbracelet. The Charmbracelet apt
+repository is the upstream-recommended route on Debian/Ubuntu and works on any
+apt-based machine, so it is the default here. The snap package is a
+single-command alternative, but only where snapd is installed.
 
-## Option A: install via snap
-
-```bash
-if command -v glow >/dev/null 2>&1; then
-  echo "glow already installed: $(glow --version)"
-else
-  sudo snap install glow
-fi
-```
-
-If `glow` is reported as installed by `snap list glow` but `command -v glow` still fails, `/snap/bin` is missing from your `PATH`. Follow [Snap PATH setup](snap_path_setup.md) to fix this once for all snap-installed CLIs.
-
-## Option B: install from the Charmbracelet apt repository
+## Option A: install from the Charmbracelet apt repository
 
 ```bash
 if command -v glow >/dev/null 2>&1; then
@@ -34,6 +25,21 @@ else
   sudo apt install -y glow
 fi
 ```
+
+## Option B: install via snap
+
+Only on machines that actually have snap — it is absent from Debian by default and
+from most minimal/server/container images. Check with `command -v snap` first.
+
+```bash
+if command -v glow >/dev/null 2>&1; then
+  echo "glow already installed: $(glow --version)"
+else
+  sudo snap install glow
+fi
+```
+
+If `glow` is reported as installed by `snap list glow` but `command -v glow` still fails, `/snap/bin` is missing from your `PATH`. Follow [Snap PATH setup](snap_path_setup.md) to fix this once for all snap-installed CLIs.
 
 ## Minimal baseline
 

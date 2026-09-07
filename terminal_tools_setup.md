@@ -1,6 +1,8 @@
 # Terminal Tools Setup Guide
 
-This is the master guide for the current WSL Ubuntu/Debian terminal setup.
+This is the master guide for the current apt-based (Debian/Ubuntu) terminal setup.
+It was written on WSL, but everything except the Windows-side pieces works the same
+on a native Debian/Ubuntu machine, including a headless server reached over SSH.
 
 Every guide in this repository is meant to be **idempotent**: safe to follow on a machine that has none, some, or all of the tools already installed. Package-manager commands may be re-run, and config steps are written to preserve existing user files unless a guide explicitly tells you to replace something.
 
@@ -19,14 +21,15 @@ Every guide in this repository is meant to be **idempotent**: safe to follow on 
 11. [git installation](git_installation.md)
 12. [Python installation](python_installation.md)
 13. [zoxide installation](zoxide_installation.md)
-14. [Snap PATH setup](snap_path_setup.md) (only needed if you plan to install snap packages such as `glow`)
+14. [Snap PATH setup](snap_path_setup.md) (only if snapd is present *and* you install snap packages — Debian has no snap by default)
 15. [glow installation](glow_installation.md)
 16. [netwatch installation](netwatch_installation.md)
-17. [WezTerm on Windows](wezterm_windows_setup.md) (the host terminal emulator)
+17. [WezTerm on Windows](wezterm_windows_setup.md) — **WSL/Windows only** (the host terminal emulator)
 
 ## Shared assumptions
 
-- Platform: WSL Ubuntu/Debian, apt-based
+- Platform: any apt-based Debian/Ubuntu, WSL or native. Steps marked **WSL only**
+  are skipped elsewhere; nothing else assumes Windows is present
 - Shell target: **framework-free `zsh`** (no Oh My Zsh) with the [starship](starship_installation.md) prompt
 - User-level binaries should remain reachable through `~/.local/bin`
 - Use upstream install methods where they provide a better result than the distro package
@@ -43,10 +46,10 @@ editing them here updates the live tool:
 | [`config/starship.toml`](config/starship.toml) | `~/.config/starship.toml` | [starship](starship_installation.md) |
 | [`config/zellij/config.kdl`](config/zellij/config.kdl) | `~/.config/zellij/config.kdl` | [zellij](zellij_installation.md) |
 | [`config/lazygit/config.yml`](config/lazygit/config.yml) | `~/.config/lazygit/config.yml` | [lazygit](lazygit_installation.md) |
-| [`scripts/wsl/xdg-open`](scripts/wsl/xdg-open) | `~/.local/bin/xdg-open` | (WSL browser wrapper, used as `$BROWSER`) |
+| [`scripts/wsl/xdg-open`](scripts/wsl/xdg-open) | `~/.local/bin/xdg-open` | **WSL only** — browser wrapper, used as `$BROWSER`. `config/zsh/env.zsh` sets `BROWSER` only when it detects WSL, so native machines keep their own `xdg-open` |
 | [`scripts/fzf/eza-fzf-preview`](scripts/fzf/eza-fzf-preview) | *(referenced by path)* | [fzf-tab](fzf_tab_completion.md) |
 | [`scripts/zellij/zellij-auto-start`](scripts/zellij/zellij-auto-start) | *(referenced by path)* | [zellij](zellij_installation.md) |
-| [`config/wezterm/wezterm.lua`](config/wezterm/wezterm.lua) | *(reference copy — Windows side)* | [WezTerm](wezterm_windows_setup.md) |
+| [`config/wezterm/wezterm.lua`](config/wezterm/wezterm.lua) | *(reference copy — Windows side)* | **WSL only** — [WezTerm](wezterm_windows_setup.md) |
 
 `~/.zshrc` is intentionally **not** in the repo (it varies per machine); the
 [migration guide](bash_to_zsh_migration.md) documents its reference content.
