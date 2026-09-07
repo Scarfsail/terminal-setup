@@ -111,7 +111,7 @@ source "$TERMINAL_SETUP/config/zsh/aliases.zsh"
 source "$TERMINAL_SETUP/config/zsh/eza.zsh"         # eza ls/tree aliases
 
 # --- secrets (machine-specific; kept out of the repo) -----------------------
-for secret in "$HOME"/.config/secrets/*.env; do
+for secret in "$HOME"/.config/secrets/*.env(N); do
   [ -f "$secret" ] && . "$secret"
 done
 
@@ -131,6 +131,12 @@ Key ordering rules:
 > **Secrets:** never inline tokens in `~/.zshrc`. Keep them in
 > `~/.config/secrets/*.env` (e.g. `chmod 600`), which the loop above sources when
 > present. That directory is not part of this repo.
+
+> **The `(N)` glob qualifier is required.** Unlike bash, zsh treats an unmatched
+> glob as a **fatal error** (the `nomatch` option), so on a machine with no
+> `~/.config/secrets/` the plain `*.env` form aborts the rest of `~/.zshrc` —
+> every line after the loop silently never runs. `(N)` (null_glob) makes the loop
+> expand to nothing instead.
 
 > **`compinit` caching:** `config/zsh/completion.zsh` runs the full security audit
 > at most once per day, then `touch`es `~/.zcompdump` so the 24-hour clock resets
