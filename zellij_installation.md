@@ -58,6 +58,35 @@ Source: [`config/zellij/config.kdl`](config/zellij/config.kdl). On a brand-new
 machine where you'd rather start from defaults, skip the symlink and let Zellij
 generate its own config (`zellij setup --dump-config`).
 
+## Migrating from tmux
+
+Some machines start terminals into tmux from an old "auto-screen" snippet in
+`~/.bashrc` (it fires only on SSH logins):
+
+```bash
+if [ "$PS1" != "" -a "${STARTED_SCREEN:-x}" = x -a "${SSH_TTY:-x}" != x ]
+then
+  ...
+  /usr/bin/tmux new -s 0 && exit 0
+  /usr/bin/tmux attach -t 0 && exit 0
+fi
+```
+
+There is usually no tmux config to port (no `~/.tmux.conf`), so the migration is
+just three steps:
+
+1. Point `~/.config/zellij/config.kdl` at the repo copy (see [Config](#config-repo-managed)
+   above); back up any pre-existing real file first.
+2. Delete the auto-screen snippet from `~/.bashrc` and append the auto-start line
+   from the section below instead. Note the behavior change: the tmux snippet ran
+   only on SSH logins, while the Zellij one runs for every interactive shell (it
+   no-ops inside Zellij).
+3. Leave the `tmux` package installed — it's harmless and other tooling may shell
+   out to it. `sudo apt purge tmux` if you want it gone.
+
+The cutover applies to **new** shells; an attached tmux session keeps running
+until you exit it.
+
 ## Verify
 
 ```bash
@@ -80,10 +109,25 @@ If an AI agent is following this guide, it should **ask the user first** whether
 
 If the user wants every new terminal to either create a Zellij session or offer the existing sessions newest-first, use the repo-managed helper script:
 
+The helper script itself is plain `bash`, so it works from either shell; only
+the interactive-shell guard differs.
+
+On **zsh**:
+
 ```bash
 chmod +x ~/dev/terminal-setup/scripts/zellij/zellij-auto-start
 echo '[[ -o interactive ]] && ~/dev/terminal-setup/scripts/zellij/zellij-auto-start' >> ~/.zshrc
 ```
+
+On **bash** (machines that haven't done the [zsh migration](bash_to_zsh_migration.md) yet):
+
+```bash
+chmod +x ~/dev/terminal-setup/scripts/zellij/zellij-auto-start
+echo '[[ $- == *i* ]] && ~/dev/terminal-setup/scripts/zellij/zellij-auto-start' >> ~/.bashrc
+```
+
+Append it **after** the `PATH` export that adds `~/.local/bin`, otherwise the
+script won't find the `zellij` binary.
 
 Behavior:
 
