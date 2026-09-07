@@ -2,7 +2,9 @@
 
 format = """
 $time$cmd_duration$status
-[](fg:#1A3356)\
+[](fg:#3A1A56)\
+$hostname\
+[](fg:#3A1A56 bg:#1A3356)\
 $directory\
 [](fg:#1A3356 bg:#4A3A0A)\
 $git_branch\
@@ -36,6 +38,11 @@ format = '[➠ $time ]($style)'
 [character]
 success_symbol = '[➜](bold green) '
 error_symbol = '[✗](bold red) '
+
+[hostname]
+ssh_only = false
+style = "fg:#E2CCFF bold bg:#3A1A56"
+format = '[ $hostname ]($style)'
 
 [directory]
 style = "fg:#D6E8FF bold bg:#1A3356"

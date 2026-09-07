@@ -52,6 +52,8 @@ readlink ~/.config/starship.toml   # -> .../terminal-setup/config/starship.toml
 
 A one-line powerline prompt:
 
+- a **hostname** block (purple), always shown (`ssh_only = false`) so the
+  machine is identifiable in every pane;
 - a **directory** block (dark blue), repo-relative with `…/` truncation and a few
   Nerd-Font directory-name icon substitutions;
 - a connected **git** block (gold) showing the branch (`` symbol) and
