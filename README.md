@@ -49,7 +49,7 @@ source of truth (most are symlinked into place — see the table in
 - [`config/wezterm/wezterm.lua`](config/wezterm/wezterm.lua) — **WSL only** — WezTerm config reference copy (Windows side; can't be symlinked across the WSL↔Windows boundary).
 - [`scripts/wsl/xdg-open`](scripts/wsl/xdg-open) — **WSL only** — WSL→Windows browser wrapper used as `$BROWSER` (symlinked to `~/.local/bin/xdg-open`); `config/zsh/env.zsh` sets `BROWSER` only when it detects WSL.
 - [`scripts/fzf/eza-fzf-preview`](scripts/fzf/eza-fzf-preview) — directory preview for fzf-tab.
-- [`scripts/zellij/zellij-auto-start`](scripts/zellij/zellij-auto-start) — interactive Zellij session launcher.
+- [`scripts/zellij/zellij-auto-start`](scripts/zellij/zellij-auto-start) — interactive Zellij session launcher (`--auto` attaches to the newest session without prompting).
 
 `~/.zshrc` is **not** tracked (it varies per machine); its reference content is in
 the [migration guide](bash_to_zsh_migration.md). Secrets stay in `~/.config/secrets/`.

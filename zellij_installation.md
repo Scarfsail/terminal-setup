@@ -135,3 +135,11 @@ Behavior:
 - outside Zellij: if sessions exist, show a table sorted by most recent use with columns for number, last used, session name, tab count, pane count, and working directory; each session gets a single-key shortcut, and pressing Enter attaches to the most recently used session
 - outside Zellij: below the table, `c` creates a new session and `s` skips Zellij for that terminal, both without needing Enter
 - inside Zellij: do nothing, so new panes and tabs do not try to attach again
+
+With `--auto` (or `-a`) the picker is skipped entirely: the script attaches to the
+most recently used session, or starts a new one when none exists. Append the flag
+to the shell-startup line if you never want to see the table:
+
+```bash
+[[ -o interactive ]] && ~/dev/terminal-setup/scripts/zellij/zellij-auto-start --auto
+```

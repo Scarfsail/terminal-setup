@@ -2,6 +2,36 @@
 
 set -euo pipefail
 
+auto_attach=false
+
+usage() {
+  cat <<'EOF'
+Usage: zellij-auto-start [--auto]
+
+  (no argument)  Show the interactive session picker (default).
+  -a, --auto     Attach to the most recently used session without prompting,
+                 or create a new one when no session exists.
+EOF
+}
+
+while (( $# > 0 )); do
+  case "$1" in
+    -a|--auto)
+      auto_attach=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'zellij-auto-start: unknown argument: %s\n' "$1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
 if [[ -n "${ZELLIJ:-}" ]]; then
   exit 0
 fi
@@ -194,6 +224,10 @@ for row in "${session_rows[@]}"; do
   pane_counts+=("$(get_session_pane_count "$session_name")")
   working_directories+=("$(get_session_working_directory "$session_name")")
 done
+
+if [[ "$auto_attach" == 'true' ]]; then
+  exec zellij attach "${sessions[0]}"
+fi
 
 build_session_shortcuts
 
