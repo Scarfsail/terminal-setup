@@ -176,6 +176,12 @@ keybinds clear-defaults=true {
     shared_except "locked" {
         bind "Alt p" { TogglePaneInGroup; }
         bind "Alt Shift p" { ToggleGroupMarking; }
+        bind "Alt a" {
+            LaunchOrFocusPlugin "file:/home/ondra/.config/zellij/plugins/falcode-zellij-sessions.wasm" {
+                floating true
+                state_dir "/home/ondra/.local/state/falcode-zellij"
+            }
+        }
     }
     shared_except "locked" "entersearch" "renametab" "renamepane" "move" "prompt" "tmux" {
         bind "Ctrl Alt h" { SwitchToMode "move"; }

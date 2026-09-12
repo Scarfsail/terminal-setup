@@ -35,6 +35,7 @@ The main entry point is [`terminal_tools_setup.md`](terminal_tools_setup.md), wh
 - [eza](https://github.com/eza-community/eza): modern `ls` replacement; backs the `ls`/`ll`/`lt`/`tree` aliases and the directory previews used by `fzf-tab` ([guide](eza_installation.md)).
 - [zoxide](https://github.com/ajeetdsouza/zoxide): smarter `cd` that tracks frecency and lets you jump to directories with short fuzzy abbreviations.
 - [Claude Code](https://www.anthropic.com/claude-code): Anthropic's terminal coding agent, including the **WSL-only** image-paste setup ([guide](claude_installation.md)).
+- [falcode-zellij](https://github.com/victor-falcon/falcode-zellij): Zellij popup listing every active AI agent pane across sessions, with a locally added Codex reporter ([guide](falcode_zellij_installation.md)).
 
 ## Repo-managed configs & scripts
 
@@ -50,6 +51,7 @@ source of truth (most are symlinked into place — see the table in
 - [`scripts/wsl/xdg-open`](scripts/wsl/xdg-open) — **WSL only** — WSL→Windows browser wrapper used as `$BROWSER` (symlinked to `~/.local/bin/xdg-open`); `config/zsh/env.zsh` sets `BROWSER` only when it detects WSL.
 - [`scripts/fzf/eza-fzf-preview`](scripts/fzf/eza-fzf-preview) — directory preview for fzf-tab.
 - [`scripts/zellij/zellij-auto-start`](scripts/zellij/zellij-auto-start) — interactive Zellij session launcher (`--auto` attaches to the newest session without prompting).
+- [`scripts/falcode-zellij/falcode-codex-hook.sh`](scripts/falcode-zellij/falcode-codex-hook.sh) — Codex CLI status reporter for the falcode-zellij popup (symlinked into `~/.local/state/falcode-zellij/`); not part of upstream falcode-zellij.
 
 `~/.zshrc` is **not** tracked (it varies per machine); its reference content is in
 the [migration guide](bash_to_zsh_migration.md). Secrets stay in `~/.config/secrets/`.

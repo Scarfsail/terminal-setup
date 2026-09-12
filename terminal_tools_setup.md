@@ -25,6 +25,7 @@ Every guide in this repository is meant to be **idempotent**: safe to follow on 
 15. [glow installation](glow_installation.md)
 16. [netwatch installation](netwatch_installation.md)
 17. [WezTerm on Windows](wezterm_windows_setup.md) — **WSL/Windows only** (the host terminal emulator)
+18. [falcode-zellij](falcode_zellij_installation.md) (Zellij AI-agent pane popup; needs Zellij plus Claude Code and/or Codex)
 
 ## Shared assumptions
 
@@ -49,6 +50,7 @@ editing them here updates the live tool:
 | [`scripts/wsl/xdg-open`](scripts/wsl/xdg-open) | `~/.local/bin/xdg-open` | **WSL only** — browser wrapper, used as `$BROWSER`. `config/zsh/env.zsh` sets `BROWSER` only when it detects WSL, so native machines keep their own `xdg-open` |
 | [`scripts/fzf/eza-fzf-preview`](scripts/fzf/eza-fzf-preview) | *(referenced by path)* | [fzf-tab](fzf_tab_completion.md) |
 | [`scripts/zellij/zellij-auto-start`](scripts/zellij/zellij-auto-start) | *(referenced by path)* | [zellij](zellij_installation.md) |
+| [`scripts/falcode-zellij/falcode-codex-hook.sh`](scripts/falcode-zellij/falcode-codex-hook.sh) | `~/.local/state/falcode-zellij/falcode-codex-hook.sh` | [falcode-zellij](falcode_zellij_installation.md) |
 | [`config/wezterm/wezterm.lua`](config/wezterm/wezterm.lua) | *(reference copy — Windows side)* | **WSL only** — [WezTerm](wezterm_windows_setup.md) |
 
 `~/.zshrc` is intentionally **not** in the repo (it varies per machine); the
